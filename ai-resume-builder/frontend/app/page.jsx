@@ -3,47 +3,98 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Sparkles, FileText, CheckCircle, Star, Lock, Zap, Target, Briefcase, TrendingUp, Brain, Award, Users, Clock, AlertCircle, Building2, GraduationCap, Wrench, ChevronRight, Globe, Linkedin, Mail, BarChart3, Shield, Rocket, PenTool, FileCheck, MessageSquare } from 'lucide-react';
 
-// API URL configuration
+// API URL configuration - FIXED VERSION
 const getApiUrl = () => {
   if (typeof window !== 'undefined') {
-    if (window.location.hostname === 'claude.ai') {
-      return 'https://ai-resume-builder-production-0a65.up.railway.app';
-    }
+    // For local development
     if (window.location.hostname === 'localhost') {
-      return 'http://localhost:3001';
+      return 'http://localhost:3000'; // Next.js default port
     }
-    try {
-      return process.env.NEXT_PUBLIC_API_URL || 'https://ai-resume-builder-production-0a65.up.railway.app';
-    } catch {
-      return 'https://ai-resume-builder-production-0a65.up.railway.app';
-    }
+    // For production, use current domain (your Vercel app)
+    return window.location.origin;
   }
-  return 'http://localhost:3001';
+  return '';
 };
 
-const API_URL = getApiUrl();
+// Railway backend for resume generation and ATS analysis
+const BACKEND_URL = 'https://ai-resume-builder-production-0a65.up.railway.app';
 
-// Stripe checkout handler - THIS IS THE FUNCTION THAT CONNECTS TO STRIPE
+// Frontend API for Stripe payments (uses Next.js API routes)
+const FRONTEND_API_URL = getApiUrl();
+
+// Enhanced Stripe checkout handler with detailed debugging
 const handleStripeCheckout = async (priceId, userEmail) => {
+  // Debug information
+  console.log('Debug Info:');
+  console.log('- Price ID:', priceId);
+  console.log('- User Email:', userEmail);
+  console.log('- Frontend API URL:', FRONTEND_API_URL);
+  
+  // Check if we have required data
+  if (!priceId || priceId === 'price_YOUR_PRICE_ID_HERE') {
+    alert('Price ID not configured. Check your environment variables.');
+    return;
+  }
+  
+  if (!userEmail) {
+    alert('Please enter your email address first.');
+    return;
+  }
+
   try {
-    const response = await fetch(`${API_URL}/api/create-checkout-session`, {
+    console.log('Attempting to call frontend API for Stripe checkout...');
+    
+    const response = await fetch(`${FRONTEND_API_URL}/api/create-checkout-session`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
       body: JSON.stringify({ 
         priceId: priceId,
-        userEmail: userEmail || 'customer@example.com'
+        userEmail: userEmail
       })
     });
     
-    const data = await response.json();
+    console.log('Response Status:', response.status);
+    console.log('Response OK:', response.ok);
+    
+    // Get response text first to see what we're getting
+    const responseText = await response.text();
+    console.log('Raw Response:', responseText);
+    
+    if (!response.ok) {
+      console.error('HTTP Error:', response.status, responseText);
+      alert(`HTTP Error ${response.status}: ${responseText}`);
+      return;
+    }
+    
+    // Try to parse as JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('JSON Parse Error:', parseError);
+      alert('Invalid response from server: ' + responseText);
+      return;
+    }
+    
+    console.log('Parsed Response:', data);
+    
     if (data.url) {
+      console.log('Redirecting to:', data.url);
       window.location.href = data.url;
     } else if (data.error) {
+      console.error('API Error:', data.error);
       alert('Payment setup error: ' + data.error);
+    } else {
+      console.error('Unexpected response:', data);
+      alert('Unexpected response from payment system');
     }
+    
   } catch (error) {
-    console.error('Checkout error:', error);
-    alert('Unable to start checkout. Please try again.');
+    console.error('Network/Fetch Error:', error);
+    alert('Connection error: ' + error.message + '. Check your internet connection.');
   }
 };
 
@@ -81,7 +132,7 @@ const ResumeBuilder = () => {
 
   const fetchIndustries = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/industries`);
+      const response = await fetch(`${BACKEND_URL}/api/industries`);
       const data = await response.json();
       setIndustries(data.industries);
     } catch (error) {
@@ -109,7 +160,7 @@ const ResumeBuilder = () => {
     setEnhancements([]);
     
     try {
-      const response = await fetch(`${API_URL}/api/enhance-resume`, {
+      const response = await fetch(`${BACKEND_URL}/api/enhance-resume`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -149,7 +200,7 @@ const ResumeBuilder = () => {
     try {
       const resumeText = `${generatedResume.summary} ${generatedResume.experience} ${generatedResume.skills}`;
       
-      const response = await fetch(`${API_URL}/api/analyze-ats`, {
+      const response = await fetch(`${BACKEND_URL}/api/analyze-ats`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1208,7 +1259,7 @@ const ResumeBuilder = () => {
                 </button>
               </div>
               
-              {/* Pro Plan - THIS IS WHERE YOU NEED TO ADD YOUR STRIPE PRICE ID */}
+              {/* Pro Plan */}
               <div className="border-2 border-blue-500 rounded-xl p-6 relative transform scale-105 shadow-xl bg-gradient-to-br from-blue-50 to-purple-50">
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">
                   MOST POPULAR
@@ -1246,7 +1297,6 @@ const ResumeBuilder = () => {
                     <span>Priority email support</span>
                   </li>
                 </ul>
-                {/* IMPORTANT: REPLACE 'price_YOUR_PRICE_ID_HERE' WITH YOUR ACTUAL STRIPE PRICE ID */}
                 <button 
                   onClick={() => handleStripeCheckout('price_1S8ORgFzgsFHkAQkppnLxKsD', formData.email)}
                   className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:shadow-lg transition"
