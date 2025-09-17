@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Download, Sparkles, FileText, CheckCircle, Star, Lock, Zap, Target, Briefcase, TrendingUp, Brain, Award, Users, Clock, AlertCircle, Building2, GraduationCap, Wrench, ChevronRight, Globe, Linkedin, Mail, BarChart3, Shield, Rocket, PenTool, FileCheck, MessageSquare } from 'lucide-react';
-import { loadStripe } from '@stripe/stripe-js';
 
 // API URL configuration
 const getApiUrl = () => {
@@ -23,6 +22,30 @@ const getApiUrl = () => {
 };
 
 const API_URL = getApiUrl();
+
+// Stripe checkout handler - THIS IS THE FUNCTION THAT CONNECTS TO STRIPE
+const handleStripeCheckout = async (priceId, userEmail) => {
+  try {
+    const response = await fetch(`${API_URL}/api/create-checkout-session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        priceId: priceId,
+        userEmail: userEmail || 'customer@example.com'
+      })
+    });
+    
+    const data = await response.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else if (data.error) {
+      alert('Payment setup error: ' + data.error);
+    }
+  } catch (error) {
+    console.error('Checkout error:', error);
+    alert('Unable to start checkout. Please try again.');
+  }
+};
 
 const ResumeBuilder = () => {
   const [formData, setFormData] = useState({
@@ -662,14 +685,11 @@ const ResumeBuilder = () => {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-white" />
-                  <div className="absolute -right-1 -bottom-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                    <Brain className="w-4 h-4 text-white" />
-                  </div>
-                </div>
-              </div>
+              <img 
+                src="/logo.png" 
+                alt="Resumind Logo" 
+                className="w-12 h-12 object-contain"
+              />
               <div>
                 <h1 className="text-2xl font-bold text-gray-800">Resumind</h1>
                 <p className="text-sm text-gray-600">AI that understands your mind</p>
@@ -1105,27 +1125,7 @@ const ResumeBuilder = () => {
                     className="w-full bg-white text-purple-600 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
                   >
                     Start 7-Day Free Trial → $9.99/mo
-                  <button 
-                    onClick={async () => {
-                      try {
-                        const response = await fetch(`${API_URL}/api/create-checkout-session`, {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ 
-                            priceId: 'price_YOUR_PRICE_ID_HERE',
-                            userEmail: formData.email || 'customer@example.com'
-                          })
-                        });
-                        const { url } = await response.json();
-                        if (url) window.location.href = url;
-                      } catch (error) {
-                        alert('Payment setup error. Please try again.');
-                      }
-                    }}
-                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:shadow-lg transition"
-                  >
-                    Start 7-Day Free Trial
-                  </button> 
+                  </button>
                   <p className="text-xs text-center mt-2 opacity-80">Cancel anytime. No hidden fees.</p>
                 </div>
               </>
@@ -1208,7 +1208,7 @@ const ResumeBuilder = () => {
                 </button>
               </div>
               
-              {/* Pro Plan */}
+              {/* Pro Plan - THIS IS WHERE YOU NEED TO ADD YOUR STRIPE PRICE ID */}
               <div className="border-2 border-blue-500 rounded-xl p-6 relative transform scale-105 shadow-xl bg-gradient-to-br from-blue-50 to-purple-50">
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">
                   MOST POPULAR
@@ -1246,10 +1246,14 @@ const ResumeBuilder = () => {
                     <span>Priority email support</span>
                   </li>
                 </ul>
-                <button className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:shadow-lg transition">
+                {/* IMPORTANT: REPLACE 'price_YOUR_PRICE_ID_HERE' WITH YOUR ACTUAL STRIPE PRICE ID */}
+                <button 
+                  onClick={() => handleStripeCheckout('price_1S8ORgFzgsFHkAQkppnLxKsD', formData.email)}
+                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:shadow-lg transition"
+                >
                   Start 7-Day Free Trial
                 </button>
-                <p className="text-xs text-center text-gray-500 mt-2">No credit card required</p>
+                <p className="text-xs text-center text-gray-500 mt-2">Cancel anytime. No charges during trial.</p>
               </div>
               
               {/* Enterprise Plan */}
