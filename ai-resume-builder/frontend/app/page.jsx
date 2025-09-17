@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Download, Sparkles, FileText, CheckCircle, Star, Lock, Zap, Target, Briefcase, TrendingUp, Brain, Award, Users, Clock, AlertCircle, Building2, GraduationCap, Wrench, ChevronRight, Globe, Linkedin, Mail, BarChart3, Shield, Rocket, PenTool, FileCheck, MessageSquare } from 'lucide-react';
+import { loadStripe } from '@stripe/stripe-js';
 
 // API URL configuration
 const getApiUrl = () => {
@@ -1104,7 +1105,27 @@ const ResumeBuilder = () => {
                     className="w-full bg-white text-purple-600 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
                   >
                     Start 7-Day Free Trial → $9.99/mo
-                  </button>
+                  <button 
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(`${API_URL}/api/create-checkout-session`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ 
+                            priceId: 'price_YOUR_PRICE_ID_HERE',
+                            userEmail: formData.email || 'customer@example.com'
+                          })
+                        });
+                        const { url } = await response.json();
+                        if (url) window.location.href = url;
+                      } catch (error) {
+                        alert('Payment setup error. Please try again.');
+                      }
+                    }}
+                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:shadow-lg transition"
+                  >
+                    Start 7-Day Free Trial
+                  </button> 
                   <p className="text-xs text-center mt-2 opacity-80">Cancel anytime. No hidden fees.</p>
                 </div>
               </>
