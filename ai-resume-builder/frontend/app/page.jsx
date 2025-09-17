@@ -18,7 +18,7 @@ const getApiUrl = () => {
     }
     // For production, use environment variable or your actual URL
     try {
-      return process.env.NEXT_PUBLIC_API_URL || 'https://your-backend.railway.app';
+      return process.env.NEXT_PUBLIC_API_URL || 'ai-resume-builder-production-0a65.up.railway.app';
     } catch {
       // If process is not defined (in artifacts), use placeholder
       return 'https://your-backend.railway.app';
