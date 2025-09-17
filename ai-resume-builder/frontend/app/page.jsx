@@ -661,12 +661,17 @@ const ResumeBuilder = () => {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl">
-                <Sparkles className="w-8 h-8 text-white" />
+              <div className="relative">
+                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-white" />
+                  <div className="absolute -right-1 -bottom-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                    <Brain className="w-4 h-4 text-white" />
+                  </div>
+                </div>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-800">ResumeAI Pro</h1>
-                <p className="text-sm text-gray-600">Multi-AI Powered Resume Builder</p>
+                <h1 className="text-2xl font-bold text-gray-800">Resumind</h1>
+                <p className="text-sm text-gray-600">AI that understands your mind</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
