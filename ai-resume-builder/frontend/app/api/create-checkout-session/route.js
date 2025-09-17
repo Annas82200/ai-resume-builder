@@ -1,24 +1,39 @@
-// For pages/api/create-checkout-session.js (if you have a pages folder)
+// app/api/create-checkout-session/route.js
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+import Stripe from 'stripe';
 
-export default async function handler(req, res) {
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Only POST requests allowed' });
-  }
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+export async function POST(request) {
   try {
-    const { priceId, userEmail } = req.body;
+    const body = await request.json();
+    const { priceId, userEmail } = body;
+
+    console.log('Received request:', { priceId, userEmail });
 
     // Check if we have the required information
     if (!priceId) {
-      return res.status(400).json({ error: 'Price ID is required' });
+      console.error('Missing priceId');
+      return Response.json({ error: 'Price ID is required' }, { status: 400 });
     }
 
     if (!userEmail) {
-      return res.status(400).json({ error: 'Email is required' });
+      console.error('Missing userEmail');
+      return Response.json({ error: 'Email is required' }, { status: 400 });
     }
+
+    // Check if environment variables are set
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('Missing STRIPE_SECRET_KEY');
+      return Response.json({ error: 'Stripe not configured' }, { status: 500 });
+    }
+
+    if (!process.env.NEXT_PUBLIC_DOMAIN) {
+      console.error('Missing NEXT_PUBLIC_DOMAIN');
+      return Response.json({ error: 'Domain not configured' }, { status: 500 });
+    }
+
+    console.log('Creating Stripe session...');
 
     // Create the Stripe checkout session
     const session = await stripe.checkout.sessions.create({
@@ -42,19 +57,26 @@ export default async function handler(req, res) {
       },
     });
 
+    console.log('Stripe session created:', session.id);
+
     // Send back the checkout URL
-    res.status(200).json({ 
+    return Response.json({ 
       url: session.url,
       sessionId: session.id 
     });
 
   } catch (error) {
-    console.error('Stripe error:', error);
+    console.error('Stripe error details:', error);
     
     // Send back a helpful error message
-    res.status(500).json({ 
+    return Response.json({ 
       error: 'Payment system error. Please try again.',
       details: error.message
-    });
+    }, { status: 500 });
   }
+}
+
+// Handle other HTTP methods
+export async function GET() {
+  return Response.json({ error: 'Method not allowed' }, { status: 405 });
 }
