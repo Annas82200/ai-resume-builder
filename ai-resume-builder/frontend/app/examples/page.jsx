@@ -1,10 +1,7 @@
+'use client'
+  
 import { FileText, Briefcase, Code, Palette, Award, ChevronRight, Eye, Download, Star, Building2, GraduationCap } from 'lucide-react';
 import { useState } from 'react';
-
-export const metadata = {
-  title: 'Resume Examples by Industry | Resumind',
-  description: 'Professional resume examples that landed interviews at top companies. Get inspired by real resumes.',
-}
 
 export default function ExamplesPage() {
   const [showRequestModal, setShowRequestModal] = useState(false);
