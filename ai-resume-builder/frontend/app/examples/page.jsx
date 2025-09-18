@@ -483,6 +483,7 @@ export default function ExamplesPage() {
         </div>
       </section>
       {/* Request Example Modal */}
+      {/* Request Example Modal */}
       {showRequestModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-8 max-w-md w-full">
@@ -509,41 +510,33 @@ export default function ExamplesPage() {
                 />
               </div>
               <button
-                // Find this section in your modal and REPLACE the onClick handler:
-<button
-  onClick={async () => {
-    // Validate inputs
-    if (!requestData.industry || !requestData.email) {
-      alert('Please fill in all fields');
-      return;
-    }
-    
-    try {
-      // Call the API
-      const response = await fetch('/api/request-example', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestData)
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        alert('Thank you! We\'ll add this example soon.');
-        setShowRequestModal(false);
-        setRequestData({ industry: '', email: '' });
-      } else {
-        alert('Sorry, there was an error. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error submitting request:', error);
-      alert('Sorry, there was an error. Please try again.');
-    }
-  }}
-  className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
->
-  Submit Request
-</button>
+                onClick={async () => {
+                  if (!requestData.industry || !requestData.email) {
+                    alert('Please fill in all fields');
+                    return;
+                  }
+                  
+                  try {
+                    const response = await fetch('/api/request-example', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(requestData)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                      alert('Thank you! We\'ll add this example soon.');
+                      setShowRequestModal(false);
+                      setRequestData({ industry: '', email: '' });
+                    } else {
+                      alert('Sorry, there was an error. Please try again.');
+                    }
+                  } catch (error) {
+                    console.error('Error submitting request:', error);
+                    alert('Sorry, there was an error. Please try again.');
+                  }
+                }}
                 className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
               >
                 Submit Request
@@ -558,6 +551,3 @@ export default function ExamplesPage() {
           </div>
         </div>
       )}
-    </div>
-  );
-}
