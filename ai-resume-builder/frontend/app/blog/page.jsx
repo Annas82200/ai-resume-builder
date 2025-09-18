@@ -1,6 +1,11 @@
 import Link from 'next/link';
 import { Calendar, Clock, ArrowRight, Target, FileText, TrendingUp } from 'lucide-react';
 
+export const metadata = {
+  title: 'Resume & Career Blog | Resumind',
+  description: 'Expert resume tips, ATS guides, and career advice to help you land your dream job.',
+}
+
 const blogPosts = [
   {
     slug: 'ats-resume-guide-2024',
