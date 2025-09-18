@@ -14,10 +14,11 @@ app.use(cors({
   origin: [
     'http://localhost:3000',
     'https://ai-resume-builder.vercel.app',
+    'https://resumind.co',
+    'https://www.resumind.co',
     /\.vercel\.app$/
   ]
 }));
-
 app.use(express.json({ limit: '10mb' }));
 
 // Initialize AI Services
