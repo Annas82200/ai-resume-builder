@@ -746,6 +746,29 @@ const ResumeBuilder = () => {
                 <p className="text-sm text-gray-600">AI that understands your mind</p>
               </div>
             </div>
+            
+            {/* Navigation - NEW ADDITION */}
+            <nav className="hidden md:flex items-center gap-6">
+              <a 
+                href="/blog" 
+                className="text-gray-700 hover:text-blue-600 font-medium transition"
+              >
+                Blog
+              </a>
+              <a 
+                href="/examples" 
+                className="text-gray-700 hover:text-blue-600 font-medium transition"
+              >
+                Examples
+              </a>
+              <a 
+                href="/pricing" 
+                className="text-gray-700 hover:text-blue-600 font-medium transition"
+              >
+                Pricing
+              </a>
+            </nav>
+            
             <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-2 text-sm text-gray-600">
                 <Shield className="w-4 h-4 text-green-600" />
