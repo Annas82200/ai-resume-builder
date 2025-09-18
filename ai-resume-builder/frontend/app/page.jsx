@@ -729,13 +729,70 @@ const ResumeBuilder = () => {
     </div>
   );
 
+  const Footer = () => (
+    <footer className="bg-gray-900 text-white py-12 mt-20">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid md:grid-cols-4 gap-8 mb-8">
+          {/* Brand */}
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <img 
+                src="/logo.png" 
+                alt="Resumind Logo" 
+                className="w-12 h-12 object-contain"
+              />
+              <h3 className="text-xl font-bold">Resumind</h3>
+            </div>
+            <p className="text-gray-400 text-sm">AI-powered resume builder that helps you land your dream job.</p>
+          </div>
+          
+          {/* Product */}
+          <div>
+            <h4 className="font-semibold mb-4">Product</h4>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li><a href="/" className="hover:text-white transition">Resume Builder</a></li>
+              <li><a href="/ats-scanner" className="hover:text-white transition">ATS Scanner</a></li>
+              <li><a href="/examples" className="hover:text-white transition">Resume Examples</a></li>
+              <li><a href="/pricing" className="hover:text-white transition">Pricing</a></li>
+            </ul>
+          </div>
+          
+          {/* Resources */}
+          <div>
+            <h4 className="font-semibold mb-4">Resources</h4>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li><a href="/blog" className="hover:text-white transition">Blog</a></li>
+              <li><a href="/blog/ats-resume-guide-2024" className="hover:text-white transition">ATS Guide</a></li>
+              <li><a href="/contact" className="hover:text-white transition">Contact</a></li>
+              <li><a href="#faq" className="hover:text-white transition">FAQ</a></li>
+            </ul>
+          </div>
+          
+          {/* Company */}
+          <div>
+            <h4 className="font-semibold mb-4">Company</h4>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li><a href="/privacy" className="hover:text-white transition">Privacy Policy</a></li>
+              <li><a href="/terms" className="hover:text-white transition">Terms of Service</a></li>
+              <li><a href="/contact" className="hover:text-white transition">Support</a></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
+          <p>&copy; {new Date().getFullYear()} Resumind. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <a href="/" className="flex items-center gap-3">
               <img 
                 src="/logo.png" 
                 alt="Resumind Logo" 
@@ -745,9 +802,9 @@ const ResumeBuilder = () => {
                 <h1 className="text-2xl font-bold text-gray-800">Resumind</h1>
                 <p className="text-sm text-gray-600">AI that understands your mind</p>
               </div>
-            </div>
+            </a>
             
-            {/* Navigation - NEW ADDITION */}
+            {/* Navigation - FIXED */}
             <nav className="hidden md:flex items-center gap-6">
               <a 
                 href="/blog" 
@@ -767,16 +824,9 @@ const ResumeBuilder = () => {
               >
                 Pricing
               </a>
-            </nav>
-            
-            <div className="flex items-center gap-4">
-              <div className="hidden md:flex items-center gap-2 text-sm text-gray-600">
-                <Shield className="w-4 h-4 text-green-600" />
-                <span>SSL Secure</span>
-              </div>
               <a 
                 href="/ats-scanner"
-                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition flex items-center gap-2"
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2"
               >
                 <Target className="w-4 h-4" />
                 Free ATS Scan
@@ -788,7 +838,12 @@ const ResumeBuilder = () => {
                 <Rocket className="w-4 h-4" />
                 Upgrade to Pro
               </button>
-            </div>
+            </nav>
+            
+            {/* Mobile Menu Button */}
+            <button className="md:hidden">
+              {/* Add mobile menu icon here */}
+            </button>
           </div>
         </div>
       </header>
@@ -1244,6 +1299,9 @@ const ResumeBuilder = () => {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
 
       {/* Pricing Modal */}
       {showPricing && (
