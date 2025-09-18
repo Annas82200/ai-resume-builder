@@ -1,0 +1,87 @@
+name: Generate Weekly Resume Examples
+
+on:
+  # Run every Monday at 9 AM UTC
+  schedule:
+    - cron: '0 9 * * 1'
+  
+  # Also allow manual trigger
+  workflow_dispatch:
+    inputs:
+      industry:
+        description: 'Industry to generate (leave empty for random)'
+        required: false
+        type: string
+      count:
+        description: 'Number of examples to generate'
+        required: false
+        default: '2'
+        type: string
+
+jobs:
+  generate-examples:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Select random industry
+        id: select-industry
+        run: |
+          if [ -z "${{ github.event.inputs.industry }}" ]; then
+            # Array of industries
+            INDUSTRIES=("healthcare" "sales" "engineering" "marketing" "finance" "hospitality" "retail" "legal")
+            # Select random industry
+            RANDOM_INDEX=$((RANDOM % ${#INDUSTRIES[@]}))
+            SELECTED="${INDUSTRIES[$RANDOM_INDEX]}"
+            echo "Selected random industry: $SELECTED"
+            echo "industry=$SELECTED" >> $GITHUB_OUTPUT
+          else
+            echo "industry=${{ github.event.inputs.industry }}" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Generate examples
+        run: |
+          cd scripts
+          node generate-examples.js --industry=${{ steps.select-industry.outputs.industry }}
+      
+      - name: Check for changes
+        id: check-changes
+        run: |
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            echo "has-changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changes detected"
+            echo "has-changes=true" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Commit and push changes
+        if: steps.check-changes.outputs.has-changes == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m "Add new ${{ steps.select-industry.outputs.industry }} resume examples"
+          git push
+      
+      - name: Create issue for manual review
+        if: steps.check-changes.outputs.has-changes == 'true'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `New ${context.payload.inputs?.industry || 'resume'} examples generated`,
+              body: `New resume examples have been generated for the ${context.payload.inputs?.industry || 'selected'} industry. Please review and update the main examples page.`,
+              labels: ['automated', 'examples']
+            })
