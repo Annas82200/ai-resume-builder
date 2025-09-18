@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { Download, Sparkles, FileText, CheckCircle, Star, Lock, Zap, Target, Briefcase, TrendingUp, Brain, Award, Users, Clock, AlertCircle, Building2, GraduationCap, Wrench, ChevronRight, Globe, Linkedin, Mail, BarChart3, Shield, Rocket, PenTool, FileCheck, MessageSquare } from 'lucide-react';
+import { Download, Sparkles, FileText, CheckCircle, Star, Lock, Zap, Target, Briefcase, TrendingUp, Brain, Award, Users, Clock, AlertCircle, Building2, GraduationCap, Wrench, ChevronRight, Globe, Linkedin, Mail, BarChart3, Shield, Rocket, PenTool, FileCheck, MessageSquare, Crown } from 'lucide-react';
 
 // API URL configuration - FIXED VERSION
 const getApiUrl = () => {
@@ -125,9 +125,43 @@ const ResumeBuilder = () => {
   const [activeProFeature, setActiveProFeature] = useState(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [isAnalyzingAts, setIsAnalyzingAts] = useState(false);
+  
+  // Premium Features States
+  const [isPremiumUser, setIsPremiumUser] = useState(false);
+  const [showCoverLetterModal, setShowCoverLetterModal] = useState(false);
+  const [showLinkedInModal, setShowLinkedInModal] = useState(false);
+  const [linkedInTips, setLinkedInTips] = useState(null);
+  const [coverLetterData, setCoverLetterData] = useState({
+    companyName: '',
+    jobTitle: '',
+    generatedLetter: ''
+  });
 
   useEffect(() => {
     fetchIndustries();
+    
+    // Check premium status
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+    
+    if (sessionId) {
+      // User just completed payment
+      setIsPremiumUser(true);
+      localStorage.setItem('premiumUser', 'true');
+      localStorage.setItem('premiumExpiry', new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString());
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 5000);
+    } else {
+      // Check if user has existing premium status
+      const premiumStatus = localStorage.getItem('premiumUser');
+      const premiumExpiry = localStorage.getItem('premiumExpiry');
+      
+      if (premiumStatus === 'true' && premiumExpiry && new Date(premiumExpiry) > new Date()) {
+        setIsPremiumUser(true);
+      }
+    }
   }, []);
 
   const fetchIndustries = async () => {
@@ -219,6 +253,101 @@ const ResumeBuilder = () => {
       console.error('ATS analysis error:', error);
     } finally {
       setIsAnalyzingAts(false);
+    }
+  };
+
+  // Premium Features Handlers
+  const handlePDFDownload = async () => {
+    if (!isPremiumUser) {
+      setActiveProFeature('pdf');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/generate-pdf`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resumeData: generatedResume,
+          template: selectedTemplate
+        })
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `${formData.fullName}-resume.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('PDF download error:', error);
+      alert('Failed to generate PDF. Please try again.');
+    }
+  };
+
+  const handleCoverLetter = async () => {
+    if (!isPremiumUser) {
+      setActiveProFeature('coverLetter');
+      return;
+    }
+    
+    setShowCoverLetterModal(true);
+  };
+
+  const generateCoverLetter = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/generate-cover-letter`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resumeData: generatedResume,
+          jobTitle: coverLetterData.jobTitle || formData.jobTitle,
+          companyName: coverLetterData.companyName,
+          jobDescription: formData.jobDescription
+        })
+      });
+      
+      const data = await response.json();
+      setCoverLetterData({
+        ...coverLetterData,
+        generatedLetter: data.coverLetter
+      });
+    } catch (error) {
+      console.error('Cover letter generation error:', error);
+    }
+  };
+
+  const handleLinkedInOptimizer = async () => {
+    if (!isPremiumUser) {
+      setActiveProFeature('linkedin');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/optimize-linkedin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resumeData: generatedResume
+        })
+      });
+      
+      const data = await response.json();
+      setLinkedInTips(data);
+      setShowLinkedInModal(true);
+    } catch (error) {
+      console.error('LinkedIn optimization error:', error);
     }
   };
 
@@ -691,6 +820,135 @@ const ResumeBuilder = () => {
     );
   };
 
+  // Cover Letter Modal
+  const CoverLetterModal = () => {
+    if (!showCoverLetterModal) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <h3 className="text-2xl font-bold mb-6">Generate Cover Letter</h3>
+          
+          <div className="space-y-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+              <input
+                type="text"
+                value={coverLetterData.companyName}
+                onChange={(e) => setCoverLetterData({...coverLetterData, companyName: e.target.value})}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter company name"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Position Title</label>
+              <input
+                type="text"
+                value={coverLetterData.jobTitle}
+                onChange={(e) => setCoverLetterData({...coverLetterData, jobTitle: e.target.value})}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter position title"
+              />
+            </div>
+          </div>
+          
+          <button
+            onClick={generateCoverLetter}
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition mb-4"
+          >
+            Generate Cover Letter
+          </button>
+          
+          {coverLetterData.generatedLetter && (
+            <div className="bg-gray-50 rounded-lg p-6 mb-4">
+              <pre className="whitespace-pre-wrap text-sm">{coverLetterData.generatedLetter}</pre>
+              <button
+                onClick={() => {
+                  const blob = new Blob([coverLetterData.generatedLetter], { type: 'text/plain' });
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `${formData.fullName}-cover-letter.txt`;
+                  a.click();
+                }}
+                className="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+              >
+                Download Cover Letter
+              </button>
+            </div>
+          )}
+          
+          <button
+            onClick={() => setShowCoverLetterModal(false)}
+            className="w-full text-gray-500 hover:text-gray-700"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // LinkedIn Modal
+  const LinkedInModal = () => {
+    if (!showLinkedInModal || !linkedInTips) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <h3 className="text-2xl font-bold mb-6">LinkedIn Profile Optimization</h3>
+          
+          <div className="space-y-6">
+            <div>
+              <h4 className="font-semibold mb-2">Optimized Headline</h4>
+              <div className="bg-blue-50 rounded-lg p-4">
+                <p className="text-blue-900">{linkedInTips.headline}</p>
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-2">About Section</h4>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <pre className="whitespace-pre-wrap text-sm">{linkedInTips.about}</pre>
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-2">Optimization Tips</h4>
+              <ul className="space-y-2">
+                {linkedInTips.tips.map((tip, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-2">Keywords to Include</h4>
+              <div className="flex flex-wrap gap-2">
+                {linkedInTips.keywords.map((keyword, i) => (
+                  <span key={i} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => setShowLinkedInModal(false)}
+            className="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   const StatsSection = () => (
     <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-8 px-4 mb-8 rounded-2xl">
       <div className="max-w-7xl mx-auto">
@@ -831,13 +1089,20 @@ const ResumeBuilder = () => {
                 <Target className="w-4 h-4" />
                 Free ATS Scan
               </a>
-              <button 
-                onClick={() => setShowPricing(true)}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition flex items-center gap-2"
-              >
-                <Rocket className="w-4 h-4" />
-                Upgrade to Pro
-              </button>
+              {isPremiumUser ? (
+                <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
+                  <Crown className="w-4 h-4" />
+                  Premium Active
+                </div>
+              ) : (
+                <button 
+                  onClick={() => setShowPricing(true)}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition flex items-center gap-2"
+                >
+                  <Rocket className="w-4 h-4" />
+                  Upgrade to Pro
+                </button>
+              )}
             </nav>
             
             {/* Mobile Menu Button */}
@@ -853,7 +1118,7 @@ const ResumeBuilder = () => {
         <div className="fixed top-20 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-down">
           <div className="flex items-center gap-2">
             <CheckCircle className="w-5 h-5" />
-            <span>Resume enhanced successfully with AI!</span>
+            <span>{isPremiumUser ? 'Welcome to Resumind Pro!' : 'Resume enhanced successfully with AI!'}</span>
           </div>
         </div>
       )}
@@ -1160,11 +1425,11 @@ const ResumeBuilder = () => {
                     </h2>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => setActiveProFeature('pdf')}
+                        onClick={handlePDFDownload}
                         className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition flex items-center gap-2 text-sm"
                       >
                         <Download className="w-4 h-4" />
-                        Download
+                        {isPremiumUser ? 'Download PDF' : 'Unlock PDF'}
                       </button>
                     </div>
                   </div>
@@ -1236,11 +1501,11 @@ const ResumeBuilder = () => {
                 <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 rounded-xl">
                   <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                     <Rocket className="w-6 h-6" />
-                    Unlock Pro Features
+                    {isPremiumUser ? 'Premium Features' : 'Unlock Pro Features'}
                   </h3>
                   <div className="grid md:grid-cols-2 gap-4 mb-6">
                     <button
-                      onClick={() => setActiveProFeature('coverLetter')}
+                      onClick={handleCoverLetter}
                       className="bg-white/20 backdrop-blur rounded-lg p-4 text-left hover:bg-white/30 transition group"
                     >
                       <PenTool className="w-8 h-8 mb-2 group-hover:scale-110 transition" />
@@ -1248,7 +1513,7 @@ const ResumeBuilder = () => {
                       <p className="text-sm opacity-90">Match your resume perfectly</p>
                     </button>
                     <button
-                      onClick={() => setActiveProFeature('linkedin')}
+                      onClick={handleLinkedInOptimizer}
                       className="bg-white/20 backdrop-blur rounded-lg p-4 text-left hover:bg-white/30 transition group"
                     >
                       <Linkedin className="w-8 h-8 mb-2 group-hover:scale-110 transition" />
@@ -1256,13 +1521,17 @@ const ResumeBuilder = () => {
                       <p className="text-sm opacity-90">Boost profile visibility</p>
                     </button>
                   </div>
-                  <button
-                    onClick={() => setShowPricing(true)}
-                    className="w-full bg-white text-purple-600 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
-                  >
-                    Start 7-Day Free Trial → $9.99/mo
-                  </button>
-                  <p className="text-xs text-center mt-2 opacity-80">Cancel anytime. No hidden fees.</p>
+                  {!isPremiumUser && (
+                    <>
+                      <button
+                        onClick={() => setShowPricing(true)}
+                        className="w-full bg-white text-purple-600 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+                      >
+                        Start 7-Day Free Trial → $9.99/mo
+                      </button>
+                      <p className="text-xs text-center mt-2 opacity-80">Cancel anytime. No hidden fees.</p>
+                    </>
+                  )}
                 </div>
               </>
             ) : (
@@ -1302,6 +1571,10 @@ const ResumeBuilder = () => {
 
       {/* Footer */}
       <Footer />
+
+      {/* Modals */}
+      <CoverLetterModal />
+      <LinkedInModal />
 
       {/* Pricing Modal */}
       {showPricing && (
