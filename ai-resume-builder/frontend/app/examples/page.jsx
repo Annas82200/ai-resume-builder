@@ -509,13 +509,41 @@ export default function ExamplesPage() {
                 />
               </div>
               <button
-                onClick={() => {
-                  // Send request to your backend or email service
-                  console.log('Example requested:', requestData);
-                  alert('Thank you! We\'ll add this example soon.');
-                  setShowRequestModal(false);
-                  setRequestData({ industry: '', email: '' });
-                }}
+                // Find this section in your modal and REPLACE the onClick handler:
+<button
+  onClick={async () => {
+    // Validate inputs
+    if (!requestData.industry || !requestData.email) {
+      alert('Please fill in all fields');
+      return;
+    }
+    
+    try {
+      // Call the API
+      const response = await fetch('/api/request-example', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData)
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('Thank you! We\'ll add this example soon.');
+        setShowRequestModal(false);
+        setRequestData({ industry: '', email: '' });
+      } else {
+        alert('Sorry, there was an error. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting request:', error);
+      alert('Sorry, there was an error. Please try again.');
+    }
+  }}
+  className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+>
+  Submit Request
+</button>
                 className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
               >
                 Submit Request
