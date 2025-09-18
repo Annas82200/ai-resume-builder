@@ -739,7 +739,7 @@ const ResumeBuilder = () => {
               <img 
                 src="/logo.png" 
                 alt="Resumind Logo" 
-                className="w-16 h-16 object-contain"
+                className="w-12 h-12 object-contain"
               />
               <div>
                 <h1 className="text-2xl font-bold text-gray-800">Resumind</h1>
@@ -751,6 +751,13 @@ const ResumeBuilder = () => {
                 <Shield className="w-4 h-4 text-green-600" />
                 <span>SSL Secure</span>
               </div>
+              <a 
+                href="/ats-scanner"
+                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition flex items-center gap-2"
+              >
+                <Target className="w-4 h-4" />
+                Free ATS Scan
+              </a>
               <button 
                 onClick={() => setShowPricing(true)}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition flex items-center gap-2"
@@ -1469,18 +1476,6 @@ const ResumeBuilder = () => {
           onClose={() => setActiveProFeature(null)} 
         />
       )}
-      
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8 mt-16">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <div className="flex justify-center gap-6 text-sm">
-            <a href="/privacy" className="hover:text-gray-300">Privacy Policy</a>
-            <a href="/terms" className="hover:text-gray-300">Terms of Service</a>
-            <a href="/contact" className="hover:text-gray-300">Contact</a>
-          </div>
-          <p className="text-gray-400 text-sm mt-4">© 2024 Resumind. All rights reserved.</p>
-        </div>
-      </footer>
       
       <style jsx>{`
         @keyframes fade-in-down {
