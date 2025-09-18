@@ -1,4 +1,4 @@
-// server.js - Premium Multi-AI Resume Builder
+// server.js - Premium Multi-AI Resume Builder (UPDATED)
 const express = require('express');
 const cors = require('cors');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
@@ -112,7 +112,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// Multi-AI Enhancement Engine
+// Multi-AI Enhancement Engine (keeping existing code)
 async function enhanceWithMultipleAIs(resumeData, industry, jobTitle, jobDescription) {
   const results = [];
   
@@ -554,47 +554,89 @@ app.post('/api/analyze-ats', async (req, res) => {
   }
 });
 
-// PDF Generation Endpoint
+// Enhanced PDF Generation Endpoint
 app.post('/api/generate-pdf', async (req, res) => {
   try {
     const { resumeData, template } = req.body;
-    const doc = new PDFDocument({ margin: 50 });
+    const doc = new PDFDocument({ 
+      margin: 50,
+      size: 'Letter',
+      info: {
+        Title: `${resumeData.fullName} - Resume`,
+        Author: 'Resumind',
+        Creator: 'Resumind AI Resume Builder'
+      }
+    });
     
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename=resume.pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${resumeData.fullName}-resume.pdf"`);
     
     doc.pipe(res);
     
     // Apply template styling
     const templateStyle = PREMIUM_TEMPLATES[template] || PREMIUM_TEMPLATES.professional;
     
-    // Header
-    doc.fontSize(24).font('Helvetica-Bold').text(resumeData.fullName, { align: 'center' });
-    doc.fontSize(12).font('Helvetica').text(`${resumeData.email} | ${resumeData.phone} | ${resumeData.location}`, { align: 'center' });
+    // Professional header
+    doc.fontSize(24).font('Helvetica-Bold')
+       .text(resumeData.fullName, { align: 'center' });
     
-    doc.moveDown();
+    doc.fontSize(10).font('Helvetica')
+       .text(`${resumeData.email} | ${resumeData.phone} | ${resumeData.location}`, { 
+         align: 'center' 
+       });
+    
+    doc.moveDown(1.5);
     
     // Professional Summary
-    doc.fontSize(14).font('Helvetica-Bold').text('PROFESSIONAL SUMMARY');
-    doc.fontSize(11).font('Helvetica').text(resumeData.summary);
-    
-    doc.moveDown();
+    if (resumeData.summary) {
+      doc.fontSize(12).font('Helvetica-Bold')
+         .text('PROFESSIONAL SUMMARY', { underline: true });
+      doc.moveDown(0.5);
+      doc.fontSize(10).font('Helvetica')
+         .text(resumeData.summary, { align: 'justify' });
+      doc.moveDown(1.5);
+    }
     
     // Experience
-    doc.fontSize(14).font('Helvetica-Bold').text('EXPERIENCE');
-    doc.fontSize(11).font('Helvetica').text(resumeData.experience);
-    
-    doc.moveDown();
+    if (resumeData.experience) {
+      doc.fontSize(12).font('Helvetica-Bold')
+         .text('PROFESSIONAL EXPERIENCE', { underline: true });
+      doc.moveDown(0.5);
+      doc.fontSize(10).font('Helvetica')
+         .text(resumeData.experience);
+      doc.moveDown(1.5);
+    }
     
     // Education
-    doc.fontSize(14).font('Helvetica-Bold').text('EDUCATION');
-    doc.fontSize(11).font('Helvetica').text(resumeData.education);
-    
-    doc.moveDown();
+    if (resumeData.education) {
+      doc.fontSize(12).font('Helvetica-Bold')
+         .text('EDUCATION', { underline: true });
+      doc.moveDown(0.5);
+      doc.fontSize(10).font('Helvetica')
+         .text(resumeData.education);
+      doc.moveDown(1.5);
+    }
     
     // Skills
-    doc.fontSize(14).font('Helvetica-Bold').text('SKILLS');
-    doc.fontSize(11).font('Helvetica').text(resumeData.skills);
+    if (resumeData.skills) {
+      doc.fontSize(12).font('Helvetica-Bold')
+         .text('SKILLS & EXPERTISE', { underline: true });
+      doc.moveDown(0.5);
+      doc.fontSize(10).font('Helvetica')
+         .text(resumeData.skills);
+    }
+    
+    // Achievements (if any)
+    if (resumeData.achievements && resumeData.achievements.length > 0) {
+      doc.moveDown(1.5);
+      doc.fontSize(12).font('Helvetica-Bold')
+         .text('KEY ACHIEVEMENTS', { underline: true });
+      doc.moveDown(0.5);
+      doc.fontSize(10).font('Helvetica');
+      resumeData.achievements.forEach(achievement => {
+        doc.text(achievement);
+      });
+    }
     
     doc.end();
   } catch (error) {
@@ -603,27 +645,79 @@ app.post('/api/generate-pdf', async (req, res) => {
   }
 });
 
-// Cover Letter Generation
+// Enhanced Cover Letter Generation
 app.post('/api/generate-cover-letter', async (req, res) => {
   try {
     const { resumeData, jobTitle, companyName, jobDescription } = req.body;
     
-    // For now, return a template
-    // In production, this would use AI to generate a custom cover letter
-    const coverLetter = `
+    // Create AI prompt for cover letter
+    const prompt = `
+Write a compelling cover letter for:
+- Candidate: ${resumeData.fullName}
+- Position: ${jobTitle}
+- Company: ${companyName}
+
+Background:
+${resumeData.summary}
+
+Experience:
+${resumeData.experience}
+
+Job Description:
+${jobDescription || 'Not provided'}
+
+Create a professional cover letter that:
+1. Opens with a strong hook
+2. Highlights relevant experience
+3. Shows knowledge of the company
+4. Demonstrates value proposition
+5. Ends with a call to action
+
+Keep it to 3-4 paragraphs, professional but personable.
+`;
+
+    let coverLetter = '';
+    
+    // Try to use AI if available
+    if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'temp123') {
+      try {
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        coverLetter = response.text();
+      } catch (error) {
+        console.error('AI generation failed:', error);
+      }
+    }
+    
+    // Fallback to template if AI fails
+    if (!coverLetter) {
+      const today = new Date().toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      
+      coverLetter = `${today}
+
+${companyName || 'Hiring Manager'}
+${jobTitle} Position
+
 Dear Hiring Manager,
 
 I am writing to express my strong interest in the ${jobTitle} position at ${companyName}. With my background in ${resumeData.industry || 'the industry'} and proven track record of success, I am confident I would be a valuable addition to your team.
 
 ${resumeData.summary}
 
-My experience aligns perfectly with your requirements, and I am excited about the opportunity to contribute to ${companyName}'s continued success.
+Throughout my career, I have consistently delivered results that exceed expectations. My experience aligns perfectly with your requirements, particularly in the areas of ${resumeData.skills ? resumeData.skills.split(',').slice(0, 3).join(', ') : 'key competencies'}. I am excited about the opportunity to bring my unique blend of skills and experience to ${companyName}.
 
-Thank you for considering my application. I look forward to discussing how my skills and experience can benefit your organization.
+I am particularly drawn to this opportunity because of ${companyName}'s reputation for innovation and excellence. I believe my background and passion for ${jobTitle.toLowerCase()} make me an ideal candidate for this role.
+
+Thank you for considering my application. I look forward to the opportunity to discuss how my skills and experience can contribute to ${companyName}'s continued success. I am available for an interview at your convenience and can be reached at ${resumeData.email} or ${resumeData.phone}.
 
 Sincerely,
-${resumeData.fullName}
-    `.trim();
+${resumeData.fullName}`;
+    }
     
     res.json({ coverLetter });
   } catch (error) {
@@ -632,32 +726,103 @@ ${resumeData.fullName}
   }
 });
 
-// LinkedIn Optimization
+// Enhanced LinkedIn Optimization
 app.post('/api/optimize-linkedin', async (req, res) => {
   try {
     const { resumeData } = req.body;
     
-    const linkedinTips = [
-      'Use a professional headshot with good lighting',
-      `Update your headline to: "${resumeData.jobTitle || 'Professional'} | ${(resumeData.skills || '').split(',').slice(0, 3).join(' | ')}"`,
+    // Generate optimized headline
+    const headline = generateLinkedInHeadline(resumeData);
+    
+    // Create optimized about section
+    const about = generateLinkedInAbout(resumeData);
+    
+    // Generate comprehensive tips
+    const tips = [
+      'Use a professional headshot with good lighting and a clean background',
+      `Update your headline to: "${headline}"`,
       'Add your enhanced professional summary to the About section',
-      'List all experiences with rich media (presentations, projects)',
-      'Get 5+ recommendations from colleagues',
-      'Add 10+ relevant skills and get endorsements',
-      'Post industry content weekly to increase visibility',
-      'Use keywords from job descriptions in your profile'
+      'List all experiences with rich media (presentations, projects, certificates)',
+      'Request 5-10 recommendations from colleagues and supervisors',
+      'Add 15+ relevant skills and get endorsements from your network',
+      'Post industry content weekly to increase visibility by 5x',
+      'Use keywords from job descriptions throughout your profile',
+      'Complete all profile sections for 40% more profile views',
+      'Add volunteer experience and causes you care about',
+      'Join relevant industry groups and participate in discussions',
+      'Enable "Open to Work" feature if actively job searching',
+      'Create a custom LinkedIn URL (linkedin.com/in/yourname)',
+      'Add accomplishments section with certifications and awards'
     ];
     
+    // Generate keyword suggestions
+    const keywords = extractTopKeywords(resumeData);
+    
     res.json({
-      headline: `${resumeData.jobTitle || 'Professional'} | ${(resumeData.skills || '').split(',').slice(0, 3).join(' | ')}`,
-      about: resumeData.summary,
-      tips: linkedinTips
+      headline,
+      about,
+      tips,
+      keywords: keywords.slice(0, 20),
+      sections: {
+        experience: 'Copy your enhanced experience section with added context',
+        skills: `Top skills to add: ${keywords.slice(0, 10).join(', ')}`,
+        summary: about
+      }
     });
   } catch (error) {
     console.error('LinkedIn optimization error:', error);
     res.status(500).json({ error: 'Failed to optimize for LinkedIn' });
   }
 });
+
+// Helper function to generate LinkedIn headline
+function generateLinkedInHeadline(resumeData) {
+  const skills = resumeData.skills ? resumeData.skills.split(',').slice(0, 3) : [];
+  const title = resumeData.jobTitle || 'Professional';
+  const industry = resumeData.industry ? resumeData.industry.charAt(0).toUpperCase() + resumeData.industry.slice(1) : '';
+  
+  if (skills.length > 0) {
+    return `${title} | ${skills.map(s => s.trim()).join(' | ')} | ${industry} Expert`;
+  }
+  
+  return `${title} | ${industry} Professional | Results-Driven Leader`;
+}
+
+// Helper function to generate LinkedIn about section
+function generateLinkedInAbout(resumeData) {
+  const intro = resumeData.summary || `Experienced professional with a passion for excellence and innovation.`;
+  
+  const skillsSection = resumeData.skills ? 
+    `\n\nCore Competencies:\n${resumeData.skills.split(',').map(s => `• ${s.trim()}`).join('\n')}` : '';
+  
+  const cta = `\n\nI'm always interested in connecting with fellow professionals and exploring new opportunities. Feel free to reach out at ${resumeData.email}`;
+  
+  return intro + skillsSection + cta;
+}
+
+// Helper function to extract top keywords
+function extractTopKeywords(resumeData) {
+  const text = `${resumeData.summary} ${resumeData.experience} ${resumeData.skills}`.toLowerCase();
+  const words = text.split(/\s+/).filter(word => word.length > 4);
+  
+  // Count frequency
+  const frequency = {};
+  words.forEach(word => {
+    frequency[word] = (frequency[word] || 0) + 1;
+  });
+  
+  // Sort by frequency and return top keywords
+  return Object.keys(frequency)
+    .sort((a, b) => frequency[b] - frequency[a])
+    .filter(word => !commonWords.has(word))
+    .slice(0, 30);
+}
+
+// Common words to exclude
+const commonWords = new Set([
+  'about', 'above', 'after', 'again', 'against', 'being', 'below', 'between',
+  'through', 'during', 'before', 'under', 'around', 'would', 'could', 'should'
+]);
 
 // Advanced rule-based enhancement (fallback)
 async function enhanceWithAdvancedRules(resumeData, industry, jobTitle, jobDescription) {
@@ -756,6 +921,47 @@ app.get('/api/industries', (req, res) => {
 // Get templates
 app.get('/api/templates', (req, res) => {
   res.json({ templates: PREMIUM_TEMPLATES });
+});
+
+// Email subscription endpoint (for blog/marketing)
+app.post('/api/subscribe', async (req, res) => {
+  try {
+    const { email, source } = req.body;
+    
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ error: 'Valid email required' });
+    }
+    
+    // Here you would typically:
+    // 1. Save to database
+    // 2. Add to email marketing service (SendGrid, Mailchimp, etc.)
+    // 3. Send welcome email
+    
+    console.log('New subscription:', { email, source });
+    
+    // For now, just return success
+    res.json({ 
+      success: true, 
+      message: 'Successfully subscribed! Check your email for confirmation.' 
+    });
+    
+  } catch (error) {
+    console.error('Subscription error:', error);
+    res.status(500).json({ error: 'Failed to subscribe' });
+  }
+});
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'healthy',
+    services: {
+      gemini: !!process.env.GEMINI_API_KEY,
+      claude: !!process.env.CLAUDE_API_KEY,
+      deepseek: !!process.env.DEEPSEEK_API_KEY
+    },
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Keyword extraction helper
