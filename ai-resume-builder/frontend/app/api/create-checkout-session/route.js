@@ -28,12 +28,10 @@ export async function POST(request) {
       return Response.json({ error: 'Stripe not configured' }, { status: 500 });
     }
 
-    if (!process.env.NEXT_PUBLIC_DOMAIN) {
-      console.error('Missing NEXT_PUBLIC_DOMAIN');
-      return Response.json({ error: 'Domain not configured' }, { status: 500 });
-    }
-
-    console.log('Creating Stripe session...');
+    // Get the current domain for redirect URLs
+    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_DOMAIN || '';
+    
+    console.log('Creating Stripe session with origin:', origin);
 
     // Create the Stripe checkout session
     const session = await stripe.checkout.sessions.create({
@@ -49,8 +47,8 @@ export async function POST(request) {
       subscription_data: {
         trial_period_days: 7, // 7-day free trial
       },
-      success_url: `${process.env.NEXT_PUBLIC_DOMAIN}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_DOMAIN}/?canceled=true`,
+      success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/?canceled=true`,
       metadata: {
         userEmail: userEmail,
         product: 'resumind-pro'
