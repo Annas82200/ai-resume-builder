@@ -1,4 +1,5 @@
 import { FileText, Briefcase, Code, Palette, Award, ChevronRight, Eye, Download, Star, Building2, GraduationCap } from 'lucide-react';
+import { useState } from 'react';
 
 export const metadata = {
   title: 'Resume Examples by Industry | Resumind',
@@ -6,6 +7,8 @@ export const metadata = {
 }
 
 export default function ExamplesPage() {
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [requestData, setRequestData] = useState({ industry: '', email: '' });
   const examples = [
     {
       id: 'tech-professional',
@@ -352,7 +355,10 @@ export default function ExamplesPage() {
           <p className="text-gray-600 mb-6">
             We're adding new resume examples every week across all industries. Want to see your industry featured?
           </p>
-          <button className="bg-white text-gray-800 px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition">
+          <button 
+            onClick={() => setShowRequestModal(true)}
+            className="bg-white text-gray-800 px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition"
+          >
             Request an Example
           </button>
         </div>
@@ -366,28 +372,42 @@ export default function ExamplesPage() {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { name: 'Technology', count: 25, icon: Code },
-              { name: 'Marketing', count: 18, icon: Palette },
-              { name: 'Finance', count: 22, icon: Building2 },
-              { name: 'Healthcare', count: 15, icon: GraduationCap },
-              { name: 'Education', count: 12, icon: GraduationCap },
-              { name: 'Sales', count: 20, icon: Briefcase },
-              { name: 'Engineering', count: 16, icon: Briefcase },
-              { name: 'Executive', count: 10, icon: Award }
-            ].map((industry) => {
-              const Icon = industry.icon;
-              return (
-                <a
-                  key={industry.name}
-                  href={`/examples?industry=${industry.name.toLowerCase()}`}
-                  className="bg-gray-50 hover:bg-gray-100 rounded-lg p-4 text-center transition group"
-                >
-                  <Icon className="w-8 h-8 mx-auto text-gray-600 group-hover:text-blue-600 mb-2 transition" />
-                  <p className="font-medium text-gray-800">{industry.name}</p>
-                  <p className="text-sm text-gray-500">{industry.count} examples</p>
-                </a>
-              );
-            })}
+            { name: 'Technology', icon: Code, hasExamples: true },
+            { name: 'Marketing & Design', icon: Palette, hasExamples: true },
+            { name: 'Finance & Banking', icon: Building2, hasExamples: true },
+            { name: 'Healthcare', icon: GraduationCap, comingSoon: true },
+            { name: 'Education', icon: GraduationCap, comingSoon: true },
+            { name: 'Sales', icon: Briefcase, comingSoon: true },
+            { name: 'Engineering', icon: Briefcase, comingSoon: true },
+            { name: 'Executive', icon: Award, hasExamples: true }
+          ].map((industry) => {
+            const Icon = industry.icon;
+            // Count actual examples for this industry
+            const count = examples.filter(ex => 
+              ex.industry.toLowerCase().includes(industry.name.split(' ')[0].toLowerCase())
+            ).length;
+            
+            return (
+              <a
+                key={industry.name}
+                href={`/examples?industry=${industry.name.toLowerCase()}`}
+                className="bg-gray-50 hover:bg-gray-100 rounded-lg p-4 text-center transition group relative"
+              >
+                {industry.comingSoon && (
+                  <span className="absolute top-2 right-2 bg-gray-400 text-white text-xs px-2 py-1 rounded-full">
+                    Soon
+                  </span>
+                )}
+                {industry.hasExamples && count > 0 && (
+                  <span className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                    {count}
+                  </span>
+                )}
+                <Icon className="w-8 h-8 mx-auto text-gray-600 group-hover:text-blue-600 mb-2 transition" />
+                <p className="font-medium text-gray-800">{industry.name}</p>
+              </a>
+            );
+          })}
           </div>
         </div>
       </section>
@@ -413,6 +433,54 @@ export default function ExamplesPage() {
           </p>
         </div>
       </section>
+      {/* Request Example Modal */}
+      {showRequestModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full">
+            <h3 className="text-2xl font-bold mb-4">Request an Industry Example</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
+                <input
+                  type="text"
+                  value={requestData.industry}
+                  onChange={(e) => setRequestData({...requestData, industry: e.target.value})}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., Healthcare, Real Estate"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={requestData.email}
+                  onChange={(e) => setRequestData({...requestData, email: e.target.value})}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="your@email.com"
+                />
+              </div>
+              <button
+                onClick={() => {
+                  // Send request to your backend or email service
+                  console.log('Example requested:', requestData);
+                  alert('Thank you! We\'ll add this example soon.');
+                  setShowRequestModal(false);
+                  setRequestData({ industry: '', email: '' });
+                }}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+              >
+                Submit Request
+              </button>
+              <button
+                onClick={() => setShowRequestModal(false)}
+                className="w-full text-gray-500 hover:text-gray-700"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
