@@ -1470,6 +1470,18 @@ const ResumeBuilder = () => {
         />
       )}
       
+      {/* Footer */}
+      <footer className="bg-gray-800 text-white py-8 mt-16">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <div className="flex justify-center gap-6 text-sm">
+            <a href="/privacy" className="hover:text-gray-300">Privacy Policy</a>
+            <a href="/terms" className="hover:text-gray-300">Terms of Service</a>
+            <a href="/contact" className="hover:text-gray-300">Contact</a>
+          </div>
+          <p className="text-gray-400 text-sm mt-4">© 2024 Resumind. All rights reserved.</p>
+        </div>
+      </footer>
+      
       <style jsx>{`
         @keyframes fade-in-down {
           from {
