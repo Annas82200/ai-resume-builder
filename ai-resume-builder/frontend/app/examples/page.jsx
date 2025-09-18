@@ -61,7 +61,58 @@ export default function ExamplesPage() {
       icon: Building2,
       rating: 4.9,
       downloads: 11300
-    }
+    },
+    {
+      id: 'registered-nurse',
+      name: 'Emily Rodriguez',
+      title: 'Emergency Room Nurse',
+      industry: 'Healthcare',
+      template: 'professional',
+      description: 'Experienced ER nurse with trauma certification',
+      highlights: ['10+ years ER experience', 'Trauma certified', 'Team leader'],
+      gradient: 'from-red-600 to-pink-600',
+      icon: GraduationCap,
+      rating: 4.9,
+      downloads: 8500
+    },
+    {
+      id: 'physical-therapist',
+      name: 'Michael Chen',
+      title: 'Physical Therapist',
+      industry: 'Healthcare',
+      template: 'modern',
+      description: 'Sports rehabilitation specialist',
+      highlights: ['DPT certified', 'Sports injury expert', '95% recovery rate'],
+      gradient: 'from-green-600 to-teal-600',
+      icon: GraduationCap,
+      rating: 4.8,
+      downloads: 6200
+    },
+    {
+      id: 'high-school-teacher',
+      name: 'Sarah Williams',
+      title: 'High School Science Teacher',
+      industry: 'Education',
+      template: 'professional',
+      description: 'Award-winning STEM educator',
+      highlights: ['Teacher of the Year', '98% pass rate', 'STEM program creator'],
+      gradient: 'from-blue-600 to-indigo-600',
+      icon: GraduationCap,
+      rating: 5.0,
+      downloads: 7800
+    },
+    {
+      id: 'college-professor',
+      name: 'Dr. James Mitchell',
+      title: 'Associate Professor',
+      industry: 'Education',
+      template: 'executive',
+      description: 'Published researcher and educator',
+      highlights: ['PhD in Education', '50+ publications', 'Department chair'],
+      gradient: 'from-purple-600 to-indigo-600',
+      icon: GraduationCap,
+      rating: 4.9,
+      downloads: 5400
   ];
 
   const ResumePreview = ({ example }) => {
