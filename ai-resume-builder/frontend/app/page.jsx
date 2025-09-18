@@ -739,7 +739,7 @@ const ResumeBuilder = () => {
               <img 
                 src="/logo.png" 
                 alt="Resumind Logo" 
-                className="w-12 h-12 object-contain"
+                className="w-16 h-16 object-contain"
               />
               <div>
                 <h1 className="text-2xl font-bold text-gray-800">Resumind</h1>
