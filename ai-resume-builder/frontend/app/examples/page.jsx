@@ -113,6 +113,7 @@ export default function ExamplesPage() {
       icon: GraduationCap,
       rating: 4.9,
       downloads: 5400
+    } 
   ];
 
   const ResumePreview = ({ example }) => {
