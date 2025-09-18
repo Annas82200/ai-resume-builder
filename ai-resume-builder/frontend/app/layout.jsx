@@ -167,6 +167,7 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="format-detection" content="telephone=no" />
+        <meta name="google-site-verification" content="DG7rmNqF80lR9CiQdaeY-VhnQ8v5l6L1r9S7cMl9mV8" />
         
         {/* Structured Data */}
         <script
