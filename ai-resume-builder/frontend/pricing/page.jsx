@@ -3,6 +3,11 @@
 import React, { useState } from 'react';
 import { Check, X, Zap, Shield, Users, Rocket, Star, Award, Brain, FileText, Target, Download, Linkedin, PenTool, MessageSquare, ChevronRight } from 'lucide-react';
 
+export const metadata = {
+  title: 'Pricing - Simple, Transparent Plans | Resumind',
+  description: 'Start free, upgrade as you grow. Professional plan at $9.99/mo with 7-day free trial.',
+}
+
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState('monthly');
   
