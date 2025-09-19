@@ -39,8 +39,8 @@ export async function POST(request) {
       try {
         // Email to yourself
         await sgMail.send({
-          to: 'your-email@example.com', // CHANGE THIS to your email!
-          from: 'noreply@resumind.com', // CHANGE THIS to your verified sender
+          to: 'annas.dahrouj@gmail.com', // CHANGE THIS to your email!
+          from: 'support@resumind.com', // CHANGE THIS to your verified sender
           subject: 'New Resume Example Request',
           text: `New example request received!\n\nIndustry: ${industry}\nEmail: ${email}\nTime: ${new Date().toLocaleString()}`,
           html: `
