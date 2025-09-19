@@ -54,7 +54,7 @@ export async function POST(request) {
         // Email to the requester
         await sgMail.send({
           to: email,
-          from: 'noreply@resumind.com', // CHANGE THIS to your verified sender
+          from: 'support@resumind.com', // CHANGE THIS to your verified sender
           subject: 'We received your resume example request!',
           text: `Thank you for requesting a ${industry} resume example! We'll add it to our collection soon.`,
           html: `
