@@ -1,227 +1,320 @@
 // scripts/generate-ai-examples.js
 const fs = require('fs').promises;
 const path = require('path');
+const OpenAI = require('openai');
 
-// You can use OpenAI, Claude, or any AI API
-// This example uses a simple template approach that can be enhanced with AI
+// Initialize OpenAI
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || 'your-key-here' // Add your key for local testing
+});
 
-// Prompts for different industries
-const industryPrompts = {
-  healthcare: {
-    roles: ['Registered Nurse', 'Physical Therapist', 'Pharmacist', 'Radiologist', 'Dental Hygienist'],
-    skills: ['Patient Care', 'Medical Records', 'HIPAA Compliance', 'Clinical Skills', 'Emergency Response']
-  },
-  technology: {
-    roles: ['Software Engineer', 'Data Scientist', 'DevOps Engineer', 'UX Designer', 'Product Manager'],
-    skills: ['Programming', 'Cloud Computing', 'Machine Learning', 'Agile', 'System Design']
-  },
-  finance: {
-    roles: ['Financial Analyst', 'Accountant', 'Investment Banker', 'Risk Manager', 'Auditor'],
-    skills: ['Financial Modeling', 'Excel', 'Risk Analysis', 'Compliance', 'Portfolio Management']
-  },
-  sales: {
-    roles: ['Sales Manager', 'Account Executive', 'Business Development', 'Sales Engineer', 'Customer Success'],
-    skills: ['CRM', 'Negotiation', 'Pipeline Management', 'Lead Generation', 'Relationship Building']
-  },
-  marketing: {
-    roles: ['Marketing Manager', 'Content Strategist', 'SEO Specialist', 'Brand Manager', 'Social Media Manager'],
-    skills: ['Digital Marketing', 'Analytics', 'Content Creation', 'SEO/SEM', 'Campaign Management']
-  }
-};
-
-// Function to generate AI-powered resume content
 async function generateAIResume(industry, role) {
-  // In a real implementation, you would call an AI API here
-  // For example with OpenAI:
-  /*
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const response = await openai.chat.completions.create({
-    model: "gpt-4",
-    messages: [{
-      role: "user",
-      content: `Generate a professional resume for a ${role} in the ${industry} industry. Include:
-      - A realistic name
-      - Professional summary (2-3 sentences)
-      - 2 job experiences with 3-4 bullet points each
-      - Education details
-      - 6-8 relevant skills
-      Format as JSON with these fields: name, title, summary, experience, education, skills`
-    }],
-    temperature: 0.8
-  });
-  return JSON.parse(response.choices[0].message.content);
-  */
-  
-  // For now, using a template approach
-  const names = [
-    'Sarah Johnson', 'Michael Chen', 'Jennifer Williams', 'David Martinez',
-    'Emily Brown', 'Robert Kim', 'Lisa Anderson', 'James Wilson'
-  ];
-  
-  const templates = {
-    'Software Engineer': {
-      summary: 'Experienced software engineer with expertise in full-stack development and cloud architecture. Proven track record of delivering scalable solutions and leading technical teams.',
-      experience: `Senior Software Engineer
-Tech Solutions Inc. (2020-Present)
-• Led development of microservices architecture serving 5M+ users
-• Reduced system latency by 45% through optimization
-• Mentored team of 6 junior developers
-• Implemented CI/CD pipeline reducing deployment time by 70%
+  try {
+    const prompt = `Generate a realistic professional resume for a ${role} in the ${industry} industry.
 
-Software Engineer
-StartupCo (2018-2020)
-• Built RESTful APIs using Node.js and Python
-• Developed responsive React applications
-• Collaborated with product team on feature development
-• Improved test coverage from 40% to 85%`,
-      education: 'BS Computer Science\nState University (2018)',
-      skills: 'JavaScript • Python • React • Node.js • AWS • Docker • MongoDB • Git'
-    },
-    'Registered Nurse': {
-      summary: 'Compassionate registered nurse with 7+ years of experience in acute care settings. Skilled in patient assessment, medication administration, and emergency response.',
-      experience: `Staff Nurse - ICU
-Regional Medical Center (2019-Present)
-• Provide critical care for 8-10 patients per shift
-• Collaborate with interdisciplinary team for patient care plans
-• Train new nurses on ICU protocols and procedures
-• Maintain 99% medication administration accuracy
-
-Registered Nurse - Med/Surg
-Community Hospital (2017-2019)
-• Managed care for diverse patient population
-• Implemented patient education programs
-• Reduced patient falls by 30% through safety initiatives
-• Received Employee of the Month award twice`,
-      education: 'BSN - Bachelor of Science in Nursing\nNursing College (2017)',
-      skills: 'Critical Care • Patient Assessment • IV Therapy • EHR Systems • BLS/ACLS • Team Leadership'
-    }
-    // Add more templates for other roles
-  };
-  
-  const randomName = names[Math.floor(Math.random() * names.length)];
-  const template = templates[role] || templates['Software Engineer'];
-  
-  return {
-    name: randomName,
-    title: role,
-    summary: template.summary,
-    experience: template.experience,
-    education: template.education,
-    skills: template.skills,
-    industry: industry
-  };
+Return ONLY valid JSON with exactly these fields:
+{
+  "name": "Full realistic name",
+  "title": "${role}",
+  "summary": "2-3 sentence professional summary highlighting key achievements",
+  "experience": "Job Title\\nCompany Name (Year-Year)\\n• Achievement with specific metrics\\n• Another achievement\\n• Third achievement\\n\\nPrevious Job Title\\nCompany (Year-Year)\\n• Achievement\\n• Achievement\\n• Achievement",
+  "education": "Degree Type in Field\\nUniversity Name (Year)\\n\\nCertification (if relevant)\\nIssuing Organization",
+  "skills": "Skill 1 • Skill 2 • Skill 3 • Skill 4 • Skill 5 • Skill 6"
 }
 
-// Function to generate example page
-function generateExamplePage(example) {
-  const slug = example.title.toLowerCase().replace(/\s+/g, '-');
-  
+Make it realistic with specific achievements, metrics, and industry-appropriate details.`;
+
+    console.log(`  🤖 Calling OpenAI for ${role}...`);
+    
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo", // Use gpt-4 if you have access
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.8,
+      max_tokens: 800
+    });
+    
+    const content = response.choices[0].message.content;
+    // Clean up the response (remove any markdown formatting)
+    const jsonStr = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    
+    return JSON.parse(jsonStr);
+    
+  } catch (error) {
+    console.error('  ❌ OpenAI API error:', error.message);
+    
+    // Fallback to template if API fails
+    const fallbackTemplates = {
+      'Software Engineer': {
+        name: 'Alex Thompson',
+        title: 'Software Engineer',
+        summary: 'Experienced full-stack developer with 5+ years building scalable web applications. Expert in React, Node.js, and cloud technologies.',
+        experience: `Senior Software Engineer\nTech Solutions Inc. (2020-Present)\n• Built microservices handling 1M+ daily requests\n• Led team of 4 developers on mobile app project\n• Reduced API response time by 60%\n\nSoftware Engineer\nStartupCo (2018-2020)\n• Developed React components used by 50K+ users\n• Implemented CI/CD pipeline with Jenkins\n• Mentored 2 junior developers`,
+        education: 'BS Computer Science\nState University (2018)',
+        skills: 'JavaScript • React • Node.js • AWS • MongoDB • Git • Docker • TypeScript'
+      }
+    };
+    
+    return fallbackTemplates[role] || fallbackTemplates['Software Engineer'];
+  }
+}
+
+function generatePageFile(slug, resumeData, industry) {
   return `'use client'
 
-import { Download, ChevronLeft, FileText, Award } from 'lucide-react';
+import { Download, ChevronLeft, FileText, Award, Target, Share2 } from 'lucide-react';
 
 export default function ${slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')}Page() {
   const resumeData = {
-    fullName: '${example.name}',
-    title: '${example.title}',
-    email: '${example.name.toLowerCase().replace(' ', '.')}@email.com',
+    fullName: '${resumeData.name}',
+    title: '${resumeData.title}',
+    email: '${resumeData.name.toLowerCase().replace(' ', '.')}@email.com',
     phone: '(555) ${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}',
     location: 'New York, NY',
-    summary: '${example.summary}',
-    experience: \`${example.experience}\`,
-    education: '${example.education}',
-    skills: '${example.skills}'
+    summary: '${resumeData.summary.replace(/'/g, "\\'")}',
+    experience: \`${resumeData.experience}\`,
+    education: '${resumeData.education.replace(/\n/g, '\\n')}',
+    skills: '${resumeData.skills}',
+    industry: '${industry}'
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Full page implementation */}
-      {/* Copy the structure from one of the existing example pages */}
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <a href="/" className="flex items-center gap-3">
+              <img src="/logo.png" alt="Resumind Logo" className="w-16 h-16 object-contain" />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800">Resumind</h1>
+                <p className="text-sm text-gray-600">AI that understands your mind</p>
+              </div>
+            </a>
+            <nav className="hidden md:flex items-center gap-6">
+              <a href="/examples" className="text-gray-700 hover:text-blue-600 font-medium transition flex items-center gap-2">
+                <ChevronLeft className="w-4 h-4" />
+                Back to Examples
+              </a>
+              <a href="/" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition">
+                Create My Resume
+              </a>
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Left Sidebar */}
+          <div className="lg:col-span-1 space-y-6">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">{resumeData.fullName}</h1>
+              <p className="text-lg text-gray-700 mb-4">{resumeData.title}</p>
+              <p className="text-gray-600 mb-6">{resumeData.summary}</p>
+              
+              <div className="mt-6 space-y-3">
+                <a href="/" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition flex items-center justify-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  Use This Template
+                </a>
+                <button className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-200 transition flex items-center justify-center gap-2">
+                  <Download className="w-4 h-4" />
+                  Download Example PDF
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Resume Preview */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl shadow-2xl p-8">
+              {/* Resume Header */}
+              <div className="text-center border-b-2 border-gray-800 pb-6 mb-6">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">{resumeData.fullName}</h1>
+                <p className="text-xl text-gray-700">{resumeData.title}</p>
+                <div className="flex justify-center gap-4 mt-3 text-gray-600">
+                  <span>{resumeData.email}</span>
+                  <span>•</span>
+                  <span>{resumeData.phone}</span>
+                  <span>•</span>
+                  <span>{resumeData.location}</span>
+                </div>
+              </div>
+              
+              {/* Professional Summary */}
+              <section className="mb-8">
+                <h2 className="text-xl font-bold text-gray-800 uppercase tracking-wider mb-3 border-b border-gray-300 pb-2">
+                  Professional Summary
+                </h2>
+                <p className="text-gray-700 leading-relaxed">{resumeData.summary}</p>
+              </section>
+              
+              {/* Experience */}
+              <section className="mb-8">
+                <h2 className="text-xl font-bold text-gray-800 uppercase tracking-wider mb-3 border-b border-gray-300 pb-2">
+                  Professional Experience
+                </h2>
+                <div className="space-y-1 text-gray-700">
+                  {resumeData.experience.split('\\n').map((line, i) => (
+                    line.trim() && (
+                      <p key={i} className={line.startsWith('•') ? 'ml-4' : 'font-semibold mt-4'}>
+                        {line}
+                      </p>
+                    )
+                  ))}
+                </div>
+              </section>
+              
+              {/* Education */}
+              <section className="mb-8">
+                <h2 className="text-xl font-bold text-gray-800 uppercase tracking-wider mb-3 border-b border-gray-300 pb-2">
+                  Education
+                </h2>
+                <div className="text-gray-700">
+                  {resumeData.education.split('\\n').map((line, i) => (
+                    line && <p key={i} className={i > 0 ? 'mt-2' : ''}>{line}</p>
+                  ))}
+                </div>
+              </section>
+              
+              {/* Skills */}
+              <section>
+                <h2 className="text-xl font-bold text-gray-800 uppercase tracking-wider mb-3 border-b border-gray-300 pb-2">
+                  Skills
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {resumeData.skills.split('•').map((skill, i) => (
+                    skill.trim() && (
+                      <span key={i} className="bg-gray-100 px-3 py-1 rounded text-sm">
+                        {skill.trim()}
+                      </span>
+                    )
+                  ))}
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }`;
 }
 
+// Industry configurations
+const industries = {
+  technology: {
+    roles: ['Software Engineer', 'Data Scientist', 'DevOps Engineer', 'UX Designer', 'Product Manager'],
+    gradient: 'from-blue-600 to-purple-600',
+    icon: 'Code'
+  },
+  healthcare: {
+    roles: ['Registered Nurse', 'Physical Therapist', 'Medical Doctor', 'Pharmacist', 'Healthcare Administrator'],
+    gradient: 'from-red-600 to-pink-600',
+    icon: 'GraduationCap'
+  },
+  finance: {
+    roles: ['Financial Analyst', 'Accountant', 'Investment Banker', 'Financial Advisor', 'Risk Manager'],
+    gradient: 'from-green-600 to-emerald-600',
+    icon: 'Building2'
+  },
+  sales: {
+    roles: ['Sales Manager', 'Account Executive', 'Business Development Rep', 'Sales Director', 'Customer Success Manager'],
+    gradient: 'from-orange-600 to-red-600',
+    icon: 'Briefcase'
+  },
+  marketing: {
+    roles: ['Marketing Manager', 'Content Strategist', 'SEO Specialist', 'Brand Manager', 'Digital Marketing Specialist'],
+    gradient: 'from-purple-600 to-pink-600',
+    icon: 'Palette'
+  }
+};
+
 // Main function
-async function generateAIExamples(industry = 'technology', count = 2) {
-  console.log(`🤖 Generating ${count} AI-powered examples for ${industry}...\n`);
+async function main() {
+  // Parse command line arguments
+  const args = process.argv.slice(2);
+  const industryArg = args.find(arg => arg.startsWith('--industry='));
+  const countArg = args.find(arg => arg.startsWith('--count='));
+  
+  const industry = industryArg ? industryArg.split('=')[1] : 'technology';
+  const count = countArg ? parseInt(countArg.split('=')[1]) : 2;
+  
+  if (!industries[industry]) {
+    console.error(`❌ Unknown industry: ${industry}`);
+    console.log('Available industries:', Object.keys(industries).join(', '));
+    return;
+  }
+  
+  console.log(`🚀 Generating ${count} AI-powered ${industry} resume examples...\n`);
   
   const baseDir = path.join(__dirname, '..', 'frontend', 'app', 'examples');
-  const industryData = industryPrompts[industry] || industryPrompts.technology;
+  const industryConfig = industries[industry];
   const generatedExamples = [];
   
   for (let i = 0; i < count; i++) {
-    // Select random role
-    const role = industryData.roles[Math.floor(Math.random() * industryData.roles.length)];
-    
+    const role = industryConfig.roles[i % industryConfig.roles.length];
     console.log(`📝 Generating example ${i + 1}/${count}: ${role}`);
     
     try {
-      // Generate resume content with AI
-      const resumeContent = await generateAIResume(industry, role);
-      const slug = role.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now();
+      // Generate with AI
+      const resumeData = await generateAIResume(industry, role);
+      const slug = `${role.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
       
-      // Create example object
-      const example = {
-        id: slug,
-        name: resumeContent.name,
-        title: resumeContent.title,
-        industry: industry.charAt(0).toUpperCase() + industry.slice(1),
-        template: ['modern', 'professional', 'creative', 'executive'][Math.floor(Math.random() * 4)],
-        description: resumeContent.summary.substring(0, 60) + '...',
-        highlights: [
-          `${Math.floor(Math.random() * 15) + 5}+ years experience`,
-          'Industry certified',
-          'Proven track record'
-        ],
-        gradient: `from-${['blue', 'green', 'purple', 'red', 'amber'][Math.floor(Math.random() * 5)]}-600 to-${['indigo', 'teal', 'pink', 'orange', 'yellow'][Math.floor(Math.random() * 5)]}-600`,
-        rating: (4.5 + Math.random() * 0.5).toFixed(1),
-        downloads: Math.floor(Math.random() * 10000) + 5000
-      };
-      
-      // Create directory and page
+      // Create directory
       const exampleDir = path.join(baseDir, slug);
       await fs.mkdir(exampleDir, { recursive: true });
       
-      const pageContent = generateExamplePage(resumeContent);
+      // Create page file
+      const pageContent = generatePageFile(slug, resumeData, industry);
       await fs.writeFile(path.join(exampleDir, 'page.jsx'), pageContent);
       
-      generatedExamples.push(example);
+      // Add to examples array
+      generatedExamples.push({
+        id: slug,
+        name: resumeData.name,
+        title: resumeData.title,
+        industry: industry.charAt(0).toUpperCase() + industry.slice(1),
+        template: ['modern', 'professional', 'creative', 'executive'][Math.floor(Math.random() * 4)],
+        description: resumeData.summary.substring(0, 80) + '...',
+        highlights: [
+          `${5 + Math.floor(Math.random() * 10)}+ years experience`,
+          'Industry expert',
+          'Proven results'
+        ],
+        gradient: industryConfig.gradient,
+        icon: industryConfig.icon,
+        rating: (4.7 + Math.random() * 0.3).toFixed(1),
+        downloads: Math.floor(5000 + Math.random() * 10000)
+      });
+      
       console.log(`  ✅ Created: ${slug}`);
       
     } catch (error) {
-      console.error(`  ❌ Error generating example:`, error.message);
+      console.error(`  ❌ Error:`, error.message);
     }
   }
   
-  console.log('\n✨ AI generation complete!');
-  console.log('\n📋 Generated examples to add to page.jsx:');
+  console.log('\n✨ Generation complete!');
+  console.log('\n📋 Add these to your examples array in page.jsx:\n');
   
   generatedExamples.forEach(ex => {
-    console.log(`
-    {
-      id: '${ex.id}',
-      name: '${ex.name}',
-      title: '${ex.title}',
-      industry: '${ex.industry}',
-      template: '${ex.template}',
-      description: '${ex.description}',
-      highlights: ${JSON.stringify(ex.highlights)},
-      gradient: '${ex.gradient}',
-      icon: ${industry === 'healthcare' ? 'GraduationCap' : industry === 'sales' ? 'Briefcase' : industry === 'engineering' ? 'Code' : 'Building2'},
-      rating: ${ex.rating},
-      downloads: ${ex.downloads}
-    },`);
+    console.log(`{
+  id: '${ex.id}',
+  name: '${ex.name}',
+  title: '${ex.title}',
+  industry: '${ex.industry}',
+  template: '${ex.template}',
+  description: '${ex.description.replace(/'/g, "\\'")}',
+  highlights: ${JSON.stringify(ex.highlights)},
+  gradient: '${ex.gradient}',
+  icon: ${ex.icon},
+  rating: ${ex.rating},
+  downloads: ${ex.downloads}
+},`);
   });
 }
 
-// Parse arguments
-const args = process.argv.slice(2);
-const industryArg = args.find(arg => arg.startsWith('--industry='));
-const countArg = args.find(arg => arg.startsWith('--count='));
-
-const industry = industryArg ? industryArg.split('=')[1] : 'technology';
-const count = countArg ? parseInt(countArg.split('=')[1]) : 2;
-
-// Run the generator
-generateAIExamples(industry, count).catch(console.error);
+// Run the script
+main().catch(console.error);
