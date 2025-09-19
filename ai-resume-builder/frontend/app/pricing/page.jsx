@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Check, X, Zap, Shield, Users, Rocket, Star, Award, Brain, FileText, Target, Download, Linkedin, PenTool, MessageSquare, ChevronRight } from 'lucide-react';
 
 export default function PricingPage() {
@@ -37,8 +38,7 @@ export default function PricingPage() {
         { name: 'Resume tracking', included: false }
       ],
       cta: 'Start Free',
-      popular: false,
-      color: 'gray'
+      popular: false
     },
     {
       name: 'Professional',
@@ -59,7 +59,6 @@ export default function PricingPage() {
       ],
       cta: 'Start 7-Day Free Trial',
       popular: true,
-      color: 'blue',
       savings: billingCycle === 'yearly' ? 'Save $24/year' : null
     },
     {
@@ -81,26 +80,25 @@ export default function PricingPage() {
       ],
       cta: 'Contact Sales',
       popular: false,
-      color: 'purple',
       savings: billingCycle === 'yearly' ? 'Save $60/year' : null
     }
   ];
 
   const testimonials = [
     {
-      name: 'Sarah M.',
+      name: 'Sarah Mitchell',
       role: 'Software Engineer at Google',
-      content: 'The AI suggestions were spot-on. I got interviews at 5 FAANG companies!',
+      content: 'The AI suggestions were spot-on. I got interviews at 5 FAANG companies within a month.',
       rating: 5
     },
     {
-      name: 'Michael R.',
+      name: 'Michael Roberts',
       role: 'Marketing Director',
       content: 'Worth every penny. The LinkedIn optimizer alone helped me get 10x more recruiter views.',
       rating: 5
     },
     {
-      name: 'Emily C.',
+      name: 'Emily Chen',
       role: 'Recent Graduate',
       content: 'As a new grad with little experience, Resumind helped me stand out. Got my dream job!',
       rating: 5
@@ -108,60 +106,57 @@ export default function PricingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+      <header className="border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <a href="/" className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3">
               <img 
                 src="/logo.png" 
-                alt="Resumind Logo" 
-                className="w-16 h-16 object-contain"
+                alt="Resumind" 
+                className="w-10 h-10 object-contain"
               />
-              <div>
-                <h1 className="text-2xl font-bold text-gray-800">Resumind</h1>
-                <p className="text-sm text-gray-600">AI that understands your mind</p>
-              </div>
-            </a>
-            <nav className="hidden md:flex items-center gap-6">
-              <a href="/blog" className="text-gray-700 hover:text-blue-600 font-medium transition">
-                Blog
-              </a>
-              <a href="/examples" className="text-gray-700 hover:text-blue-600 font-medium transition">
+              <span className="text-xl font-semibold text-gray-900">Resumind</span>
+            </Link>
+            <nav className="hidden md:flex items-center gap-8">
+              <Link href="/examples" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
                 Examples
-              </a>
-              <a href="/pricing" className="text-blue-600 font-medium">
+              </Link>
+              <Link href="/blog" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                Blog
+              </Link>
+              <Link href="/pricing" className="text-gray-900 font-medium">
                 Pricing
-              </a>
-              <a 
+              </Link>
+              <Link 
                 href="/"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition"
+                className="bg-gray-900 text-white px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-colors font-medium"
               >
-                Create Resume
-              </a>
+                Get Started
+              </Link>
             </nav>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="py-16 px-4">
+      <section className="bg-gray-50 py-16 px-6">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Simple, Transparent Pricing
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-12">
             Start free and upgrade as you grow. No hidden fees, cancel anytime.
           </p>
 
           {/* Billing Toggle */}
-          <div className="inline-flex items-center bg-gray-100 rounded-lg p-1 mb-12">
+          <div className="inline-flex items-center bg-white border border-gray-200 rounded-lg p-1">
             <button
               onClick={() => setBillingCycle('monthly')}
               className={`px-6 py-2 rounded-md font-medium transition ${
                 billingCycle === 'monthly'
-                  ? 'bg-white text-gray-900 shadow'
+                  ? 'bg-gray-900 text-white'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -171,44 +166,44 @@ export default function PricingPage() {
               onClick={() => setBillingCycle('yearly')}
               className={`px-6 py-2 rounded-md font-medium transition ${
                 billingCycle === 'yearly'
-                  ? 'bg-white text-gray-900 shadow'
+                  ? 'bg-gray-900 text-white'
                   : 'text-gray-600 hover:text-gray-900'
-              }`}
+              } flex items-center gap-2`}
             >
               Yearly
-              <span className="ml-2 text-green-600 text-sm">Save 20%</span>
+              <span className="text-green-600 text-sm font-normal">Save 20%</span>
             </button>
           </div>
         </div>
       </section>
 
       {/* Pricing Cards */}
-      <section className="max-w-7xl mx-auto px-4 pb-16">
+      <section className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid md:grid-cols-3 gap-8">
           {plans.map((plan) => (
             <div
               key={plan.name}
-              className={`relative bg-white rounded-2xl shadow-xl p-8 ${
-                plan.popular ? 'ring-2 ring-blue-600 transform scale-105' : ''
+              className={`relative bg-white rounded-xl p-8 ${
+                plan.popular 
+                  ? 'shadow-xl border-2 border-gray-900' 
+                  : 'shadow-sm border border-gray-200'
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-full text-sm font-semibold">
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-4 py-1 rounded-full text-sm font-medium">
                   MOST POPULAR
                 </div>
               )}
 
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                <h3 className="text-2xl font-semibold text-gray-900 mb-2">{plan.name}</h3>
                 <p className="text-gray-600 mb-4">{plan.tagline}</p>
                 <div className="mb-2">
-                  <span className="text-5xl font-bold">
+                  <span className="text-4xl font-bold text-gray-900">
                     {plan.price === 0 ? 'Free' : `$${plan.price}`}
                   </span>
                   {plan.price > 0 && (
-                    <span className="text-gray-600 ml-2">
-                      /{billingCycle === 'monthly' ? 'mo' : 'mo'}
-                    </span>
+                    <span className="text-gray-600 ml-2">/month</span>
                   )}
                 </div>
                 {plan.savings && (
@@ -220,9 +215,9 @@ export default function PricingPage() {
                 {plan.features.map((feature, index) => (
                   <li key={index} className="flex items-start gap-3">
                     {feature.included ? (
-                      <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <Check className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                     ) : (
-                      <X className="w-5 h-5 text-gray-300 mt-0.5 flex-shrink-0" />
+                      <span className="w-5 h-5 text-gray-300 mt-0.5 flex-shrink-0 text-center">–</span>
                     )}
                     <span
                       className={`text-sm ${
@@ -237,12 +232,12 @@ export default function PricingPage() {
 
               <button
                 onClick={() => handleStripeCheckout(plan.priceId, plan.name)}
-                className={`w-full py-3 rounded-lg font-semibold transition ${
+                className={`w-full py-3 rounded-lg font-medium transition ${
                   plan.popular
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg'
+                    ? 'bg-gray-900 text-white hover:bg-gray-800'
                     : plan.name === 'Enterprise'
-                    ? 'bg-purple-600 text-white hover:bg-purple-700'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                    : 'bg-white text-gray-900 border border-gray-200 hover:bg-gray-50'
                 }`}
               >
                 {plan.cta}
@@ -259,23 +254,19 @@ export default function PricingPage() {
       </section>
 
       {/* Comparison Table */}
-      <section className="bg-white py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
+      <section className="bg-gray-50 py-16">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
             Detailed Feature Comparison
           </h2>
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full bg-white rounded-lg overflow-hidden">
               <thead>
-                <tr className="border-b">
-                  <th className="text-left py-4 px-4">Features</th>
-                  <th className="text-center py-4 px-4">Basic</th>
-                  <th className="text-center py-4 px-4">
-                    <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                      Professional
-                    </span>
-                  </th>
-                  <th className="text-center py-4 px-4">Enterprise</th>
+                <tr className="border-b bg-gray-50">
+                  <th className="text-left py-4 px-6 font-medium text-gray-900">Features</th>
+                  <th className="text-center py-4 px-6 font-medium text-gray-900">Basic</th>
+                  <th className="text-center py-4 px-6 font-medium text-gray-900">Professional</th>
+                  <th className="text-center py-4 px-6 font-medium text-gray-900">Enterprise</th>
                 </tr>
               </thead>
               <tbody>
@@ -283,19 +274,19 @@ export default function PricingPage() {
                   { feature: 'AI Resume Generation', basic: '1/month', pro: 'Unlimited', enterprise: 'Unlimited' },
                   { feature: 'Resume Templates', basic: '4', pro: 'All Premium', enterprise: 'All + Custom' },
                   { feature: 'ATS Optimization', basic: 'Basic', pro: 'Advanced', enterprise: 'Advanced + Expert Review' },
-                  { feature: 'Download Formats', basic: '-', pro: 'PDF, DOCX', enterprise: 'PDF, DOCX, HTML' },
-                  { feature: 'Cover Letters', basic: '-', pro: 'Unlimited', enterprise: 'Unlimited + Templates' },
-                  { feature: 'LinkedIn Optimizer', basic: '-', pro: '✓', enterprise: '✓' },
+                  { feature: 'Download Formats', basic: '–', pro: 'PDF, DOCX', enterprise: 'PDF, DOCX, HTML' },
+                  { feature: 'Cover Letters', basic: '–', pro: 'Unlimited', enterprise: 'Unlimited + Templates' },
+                  { feature: 'LinkedIn Optimizer', basic: '–', pro: '✓', enterprise: '✓' },
                   { feature: 'Team Members', basic: '1', pro: '1', enterprise: '5+' },
                   { feature: 'Support', basic: 'Email', pro: 'Priority Email', enterprise: 'Dedicated Manager' },
-                  { feature: 'Career Coaching', basic: '-', pro: '-', enterprise: '1-on-1 Sessions' },
-                  { feature: 'API Access', basic: '-', pro: '-', enterprise: '✓' },
+                  { feature: 'Career Coaching', basic: '–', pro: '–', enterprise: '1-on-1 Sessions' },
+                  { feature: 'API Access', basic: '–', pro: '–', enterprise: '✓' },
                 ].map((row, index) => (
                   <tr key={index} className="border-b">
-                    <td className="py-4 px-4 font-medium">{row.feature}</td>
-                    <td className="text-center py-4 px-4 text-gray-600">{row.basic}</td>
-                    <td className="text-center py-4 px-4 text-blue-600 font-medium">{row.pro}</td>
-                    <td className="text-center py-4 px-4 text-purple-600 font-medium">{row.enterprise}</td>
+                    <td className="py-4 px-6 text-gray-900">{row.feature}</td>
+                    <td className="text-center py-4 px-6 text-gray-600">{row.basic}</td>
+                    <td className="text-center py-4 px-6 text-gray-900 font-medium">{row.pro}</td>
+                    <td className="text-center py-4 px-6 text-gray-600">{row.enterprise}</td>
                   </tr>
                 ))}
               </tbody>
@@ -305,22 +296,22 @@ export default function PricingPage() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-16 px-4">
+      <section className="py-16 px-6">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
             Loved by Job Seekers Worldwide
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white rounded-xl p-6 shadow-lg">
+              <div key={index} className="bg-white rounded-xl p-6 border border-gray-200">
                 <div className="flex mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                    <Star key={i} className="w-5 h-5 text-yellow-500 fill-current" />
                   ))}
                 </div>
                 <p className="text-gray-700 mb-4">"{testimonial.content}"</p>
                 <div>
-                  <p className="font-semibold">{testimonial.name}</p>
+                  <p className="font-medium text-gray-900">{testimonial.name}</p>
                   <p className="text-sm text-gray-600">{testimonial.role}</p>
                 </div>
               </div>
@@ -330,9 +321,9 @@ export default function PricingPage() {
       </section>
 
       {/* FAQs */}
-      <section className="bg-gray-50 py-16 px-4">
+      <section className="bg-gray-50 py-16 px-6">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
             Frequently Asked Questions
           </h2>
           <div className="space-y-6">
@@ -358,8 +349,8 @@ export default function PricingPage() {
                 a: 'Yes, we use bank-level encryption to protect your data. We never share your personal information with third parties.'
               }
             ].map((faq, index) => (
-              <div key={index} className="bg-white rounded-lg p-6 shadow">
-                <h3 className="font-semibold text-lg mb-2">{faq.q}</h3>
+              <div key={index} className="bg-white rounded-lg p-6 border border-gray-200">
+                <h3 className="font-medium text-lg text-gray-900 mb-2">{faq.q}</h3>
                 <p className="text-gray-700">{faq.a}</p>
               </div>
             ))}
@@ -368,37 +359,46 @@ export default function PricingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-4">
+      <section className="py-16 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
             Ready to Transform Your Job Search?
           </h2>
           <p className="text-xl text-gray-600 mb-8">
             Join 127,000+ job seekers who've landed their dream jobs with Resumind
           </p>
-          <a
+          <Link
             href="/"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-bold hover:shadow-lg transition"
+            className="inline-flex items-center gap-2 bg-gray-900 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
           >
             <Rocket className="w-5 h-5" />
             Get Started Free
-          </a>
-          <div className="flex items-center justify-center gap-6 mt-8 text-sm text-gray-600">
+          </Link>
+          <div className="flex items-center justify-center gap-8 mt-12 text-sm text-gray-600">
             <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-green-600" />
+              <Shield className="w-5 h-5 text-gray-600" />
               <span>SSL Secure</span>
             </div>
             <div className="flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-green-600" />
+              <MessageSquare className="w-5 h-5 text-gray-600" />
               <span>24/7 Support</span>
             </div>
             <div className="flex items-center gap-2">
-              <Award className="w-5 h-5 text-green-600" />
+              <Award className="w-5 h-5 text-gray-600" />
               <span>Money-back Guarantee</span>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-50 border-t border-gray-200 py-12">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center text-sm text-gray-600">
+            © 2024 Resumind. All rights reserved.
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
