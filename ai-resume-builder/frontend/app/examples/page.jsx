@@ -6,6 +6,11 @@ import { useState } from 'react';
 export default function ExamplesPage() {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [requestData, setRequestData] = useState({ industry: '', email: '' });
+  
+  // Add filter state variables
+  const [selectedIndustry, setSelectedIndustry] = useState('all');
+  const [selectedTemplate, setSelectedTemplate] = useState('all');
+  
   const examples = [
     {
       id: 'tech-professional',
@@ -110,8 +115,43 @@ export default function ExamplesPage() {
       icon: GraduationCap,
       rating: 4.9,
       downloads: 5400
-    } 
+    },
+    {
+      id: 'sales-manager',
+      name: 'Jennifer Thompson',
+      title: 'Regional Sales Manager',
+      industry: 'Sales',
+      template: 'modern',
+      description: 'B2B sales leader exceeding targets for 10+ years',
+      highlights: ['$15M annual revenue', '150% quota achievement', 'Team of 12 reps'],
+      gradient: 'from-orange-600 to-red-600',
+      icon: Briefcase,
+      rating: 4.8,
+      downloads: 9200
+    },
+    {
+      id: 'software-engineer',
+      name: 'David Park',
+      title: 'Senior Software Engineer',
+      industry: 'Engineering',
+      template: 'modern',
+      description: 'Full-stack developer with cloud architecture expertise',
+      highlights: ['Led 5 major projects', 'AWS certified', 'Reduced costs 40%'],
+      gradient: 'from-blue-600 to-cyan-600',
+      icon: Code,
+      rating: 4.9,
+      downloads: 11500
+    }
   ];
+  
+  // Filter function
+  const filteredExamples = examples.filter(example => {
+    const matchesIndustry = selectedIndustry === 'all' || 
+      example.industry.toLowerCase().includes(selectedIndustry.toLowerCase()) ||
+      selectedIndustry.toLowerCase().includes(example.industry.toLowerCase());
+    const matchesTemplate = selectedTemplate === 'all' || example.template === selectedTemplate;
+    return matchesIndustry && matchesTemplate;
+  });
 
   const ResumePreview = ({ example }) => {
     const Icon = example.icon;
@@ -325,10 +365,64 @@ export default function ExamplesPage() {
         </div>
       </section>
 
-      {/* Examples Grid */}
+      {/* Filter Section */}
+      <section className="max-w-7xl mx-auto px-4 py-8">
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="flex flex-wrap gap-6">
+            {/* Industry Filter */}
+            <div className="flex-1 min-w-[200px]">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Filter by Industry
+              </label>
+              <select
+                value={selectedIndustry}
+                onChange={(e) => setSelectedIndustry(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Industries</option>
+                <option value="technology">Technology</option>
+                <option value="healthcare">Healthcare</option>
+                <option value="finance">Finance & Banking</option>
+                <option value="marketing">Marketing & Design</option>
+                <option value="sales">Sales</option>
+                <option value="education">Education</option>
+                <option value="engineering">Engineering</option>
+                <option value="executive">Executive Leadership</option>
+              </select>
+            </div>
+            
+            {/* Template Filter */}
+            <div className="flex-1 min-w-[200px]">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Filter by Template
+              </label>
+              <select
+                value={selectedTemplate}
+                onChange={(e) => setSelectedTemplate(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Templates</option>
+                <option value="professional">Professional</option>
+                <option value="modern">Modern</option>
+                <option value="creative">Creative</option>
+                <option value="executive">Executive</option>
+              </select>
+            </div>
+            
+            {/* Results Count */}
+            <div className="flex items-end">
+              <p className="text-gray-600">
+                Showing <span className="font-semibold">{filteredExamples.length}</span> examples
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Examples Grid - Now uses filteredExamples */}
       <section className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid md:grid-cols-2 gap-8 mb-12">
-          {examples.map((example) => {
+          {filteredExamples.map((example) => {
             const Icon = example.icon;
             return (
               <div key={example.id} className="group">
@@ -398,6 +492,22 @@ export default function ExamplesPage() {
           })}
         </div>
 
+        {/* No Results Message */}
+        {filteredExamples.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-600 mb-4">No examples found matching your filters.</p>
+            <button
+              onClick={() => {
+                setSelectedIndustry('all');
+                setSelectedTemplate('all');
+              }}
+              className="text-blue-600 hover:text-blue-700 font-medium"
+            >
+              Clear Filters
+            </button>
+          </div>
+        )}
+
         {/* More Examples Coming Soon */}
         <div className="bg-gradient-to-r from-gray-100 to-gray-200 rounded-xl p-8 text-center">
           <h3 className="text-2xl font-bold text-gray-800 mb-3">More Examples Coming Soon!</h3>
@@ -424,8 +534,8 @@ export default function ExamplesPage() {
             { name: 'Technology', icon: Code, hasExamples: true },
             { name: 'Marketing & Design', icon: Palette, hasExamples: true },
             { name: 'Finance & Banking', icon: Building2, hasExamples: true },
-            { name: 'Healthcare', icon: GraduationCap, comingSoon: true },
-            { name: 'Education', icon: GraduationCap, comingSoon: true },
+            { name: 'Healthcare', icon: GraduationCap, hasExamples: true },
+            { name: 'Education', icon: GraduationCap, hasExamples: true },
             { name: 'Sales', icon: Briefcase, comingSoon: true },
             { name: 'Engineering', icon: Briefcase, comingSoon: true },
             { name: 'Executive', icon: Award, hasExamples: true }
@@ -437,9 +547,9 @@ export default function ExamplesPage() {
             ).length;
             
             return (
-              <a
+              <button
                 key={industry.name}
-                href={`/examples?industry=${industry.name.toLowerCase()}`}
+                onClick={() => setSelectedIndustry(industry.name.split(' ')[0].toLowerCase())}
                 className="bg-gray-50 hover:bg-gray-100 rounded-lg p-4 text-center transition group relative"
               >
                 {industry.comingSoon && (
@@ -454,7 +564,7 @@ export default function ExamplesPage() {
                 )}
                 <Icon className="w-8 h-8 mx-auto text-gray-600 group-hover:text-blue-600 mb-2 transition" />
                 <p className="font-medium text-gray-800">{industry.name}</p>
-              </a>
+              </button>
             );
           })}
           </div>
@@ -482,7 +592,7 @@ export default function ExamplesPage() {
           </p>
         </div>
       </section>
-      {/* Request Example Modal */}
+
       {/* Request Example Modal */}
       {showRequestModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -551,6 +661,6 @@ export default function ExamplesPage() {
           </div>
         </div>
       )}
-      </div>
-   );
-   }
+    </div>
+  );
+}
