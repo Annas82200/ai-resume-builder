@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Download, Sparkles, FileText, CheckCircle, Star, Lock, Zap, Target, Briefcase, TrendingUp, Brain, Award, Users, Clock, AlertCircle, Building2, GraduationCap, Wrench, ChevronRight, Globe, Linkedin, Mail, BarChart3, Shield, Rocket, PenTool, FileCheck, MessageSquare, Crown, DollarSign, Upload, X } from 'lucide-react';
+import { Download, Sparkles, FileText, CheckCircle, Star, Lock, Zap, Target, Briefcase, TrendingUp, Brain, Award, Users, Clock, AlertCircle, Building2, GraduationCap, Wrench, ChevronRight, Globe, Linkedin, Mail, BarChart3, Shield, Rocket, PenTool, FileCheck, MessageSquare, Crown, DollarSign, Upload, X, Code } from 'lucide-react';
 
 // API URL configuration
 const getApiUrl = () => {
